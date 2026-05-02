@@ -22,12 +22,14 @@ class Config:
     # Site sections - drives both header nav and sidebar nav.
     # Add/remove items freely; the UI scales to match.
     # `slug` is used in URLs; `label` is displayed.
+    # `href` is optional – omit to use the default /section/<slug> URL.
     # ------------------------------------------------------------------
     NAV_SECTIONS = [
         {"slug": "stories",   "label": "STORIES"},
         {"slug": "archive",   "label": "ARCHIVE"},
         {"slug": "rituals",   "label": "RITUALS"},
         {"slug": "lost",      "label": "LOST FILES"},
+        {"slug": "gallery",   "label": "GALLERY",   "href": "/gallery"},
         {"slug": "submit",    "label": "SUBMIT"},
         {"slug": "about",     "label": "ABOUT"},
     ]

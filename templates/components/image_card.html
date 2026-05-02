@@ -1,0 +1,33 @@
+{# ====================================================================
+   image_card.html - single tile in the masonry grid.
+
+   Expected context variable: `image` (models.image.Image instance).
+
+   data-* attributes carry all info the JS viewer needs –
+   no extra API calls required to open the lightbox.
+   ==================================================================== #}
+<article
+  class="image-card"
+  data-image-id="{{ image.id }}"
+  data-image-src="{{ url_for('static', filename='images/gallery/' + image.filename) }}"
+  data-image-title="{{ image.title }}"
+  role="button"
+  tabindex="0"
+  aria-label="View image: {{ image.title }}"
+>
+  {# Wrapper keeps the overlay scoped to the image area only. #}
+  <div class="image-card__img-wrap">
+    <img
+      class="image-card__img"
+      src="{{ url_for('static', filename='images/gallery/' + image.filename) }}"
+      alt="{{ image.alt or image.title }}"
+      loading="lazy"
+    />
+    {# Semi-transparent darkening layer – opacity driven by CSS :hover. #}
+    <div class="image-card__hover-overlay" aria-hidden="true"></div>
+  </div>
+
+  {# Title sits below the image with breathing room so it never
+     bleeds into the card below. #}
+  <p class="image-card__title">{{ image.title }}</p>
+</article>

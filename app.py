@@ -10,6 +10,7 @@ from flask import Flask
 
 from config import Config
 from routes.main import main_bp
+from routes.gallery import gallery_bp  # image masonry feed
 
 
 def create_app(config_class: type = Config) -> Flask:
@@ -20,6 +21,7 @@ def create_app(config_class: type = Config) -> Flask:
     # Register blueprints. Add new blueprints here as the site grows
     # (e.g. auth_bp, admin_bp, api_bp).
     app.register_blueprint(main_bp)
+    app.register_blueprint(gallery_bp)  # /gallery route
 
     # FUTURE: initialize SQLAlchemy here once models/database.py is wired up:
     #     from models.database import db

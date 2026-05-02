@@ -1,0 +1,29 @@
+{# ====================================================================
+   gallery.html - image masonry feed.
+   Extends base.html; overrides the `content` block.
+   The viewer overlay is included once per page; image cards are
+   rendered via the image_card component.
+   ==================================================================== #}
+{% extends 'base.html' %}
+
+{% block title %}CreepyDocs — Gallery{% endblock %}
+
+{% block content %}
+<div class="gallery-wrapper">
+
+  {# ---- Lightbox overlay (hidden by default, activated by JS) ---- #}
+  {% include 'components/image_viewer.html' %}
+
+  {# ---- Masonry grid ---- #}
+  {% if images %}
+    <div class="gallery-grid" id="gallery-grid">
+      {% for image in images %}
+        {% include 'components/image_card.html' %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="gallery__empty">— NO IMAGES YET —</p>
+  {% endif %}
+
+</div>
+{% endblock %}

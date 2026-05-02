@@ -1,0 +1,58 @@
+{# ====================================================================
+   image_viewer.html - fullscreen lightbox overlay.
+
+   JS (gallery.js → ImageViewer class) drives all open/close state.
+   Rendered once per gallery page; always present in the DOM.
+
+   Extension guide (add features without touching this template):
+     - Navigation (prev/next): extend ImageViewer.open(), add arrow buttons
+       by targeting #viewer-controls.
+     - Comments sidebar: toggle a panel via #viewer-extras.
+     - Metadata bar: populate #viewer-meta in ImageViewer.open().
+     - Download button: add to #viewer-footer.
+   ==================================================================== #}
+<div
+  id="image-viewer"
+  class="image-viewer"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Image viewer"
+  data-state="closed"
+>
+  {# Backdrop – clicking here closes the viewer. #}
+  <div class="image-viewer__backdrop" id="viewer-backdrop"></div>
+
+  <div class="image-viewer__panel">
+
+    {# ---- Top bar ---- #}
+    <div class="image-viewer__topbar">
+      {# FUTURE: add prev/next arrows here (id="viewer-controls"). #}
+      <span class="image-viewer__spacer"></span>
+      <button
+        class="image-viewer__close"
+        id="viewer-close"
+        aria-label="Close viewer (Esc)"
+      >✕</button>
+    </div>
+
+    {# ---- Image ---- #}
+    <div class="image-viewer__img-wrap">
+      <img
+        class="image-viewer__img"
+        id="viewer-img"
+        src=""
+        alt=""
+      />
+    </div>
+
+    {# ---- Footer ---- #}
+    <div class="image-viewer__footer" id="viewer-footer">
+      <span class="image-viewer__title" id="viewer-title"></span>
+      {# FUTURE slots:
+           <div id="viewer-meta">  – uploaded_by, date, tags
+           <div id="viewer-extras"> – comments toggle, rating, share
+      #}
+    </div>
+
+  </div>
+</div>

@@ -16,9 +16,12 @@
      config.py and it appears here automatically. #}
   <nav class="site-header__nav" aria-label="Primary">
     {% for section in nav_sections %}
+      {# Use section.href if provided, otherwise fall back to /section/<slug>.
+         This lets special pages (gallery, submit…) point to custom routes
+         without breaking the standard section pattern. #}
       <a
         class="site-header__nav-link {% if active_section == section.slug %}is-active{% endif %}"
-        href="{{ url_for('main.section', slug=section.slug) }}"
+        href="{{ section.get('href') or url_for('main.section', slug=section.slug) }}"
       >{{ section.label }}</a>
     {% endfor %}
   </nav>

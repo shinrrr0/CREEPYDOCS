@@ -1,0 +1,243 @@
+/* ====================================================================
+   gallery.css - masonry image feed, image cards, lightbox overlay.
+   References design tokens from base.css.
+   Only affects elements that exist on the gallery page –
+   safe to load globally without side effects on other pages.
+   ==================================================================== */
+
+/* ---- Page wrapper ---- */
+.gallery-wrapper {
+  padding: 0 1rem 4rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* ---- Empty state ---- */
+.gallery__empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-family: var(--font-typewriter);
+  letter-spacing: 0.2em;
+  padding: 6rem 0;
+}
+
+/* ==================================================================
+   MASONRY GRID
+   Uses CSS multi-column layout – fast, no JS required for the grid.
+   Items flow top-to-bottom within each column; different image heights
+   create the organic, non-linear look naturally.
+   ================================================================== */
+.gallery-grid {
+  columns: 4 220px;   /* 4 col max; min 220px so mobile collapses cleanly */
+  column-gap: 10px;
+  /* Dim the grid when the viewer is active (driven by data-dimmed on wrapper). */
+  transition: filter var(--dur-base) var(--ease-out),
+              opacity var(--dur-base) var(--ease-out);
+}
+
+/* When a viewer is open, dim the whole grid. */
+.gallery-wrapper[data-dimmed="true"] .gallery-grid {
+  filter: brightness(0.25);
+  pointer-events: none;      /* prevent card interaction while viewer is open */
+}
+
+/* Responsive column breakpoints */
+@media (max-width: 1100px) { .gallery-grid { columns: 3 200px; } }
+@media (max-width:  720px) { .gallery-grid { columns: 2 160px; } }
+@media (max-width:  440px) { .gallery-grid { columns: 1;       } }
+
+
+/* ==================================================================
+   IMAGE CARD
+   ================================================================== */
+.image-card {
+  break-inside: avoid;          /* keep title + image in the same column */
+  display: inline-block;        /* required for break-inside to work in some browsers */
+  width: 100%;
+  margin-bottom: 10px;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Wrap constrains the overlay to image bounds only. */
+.image-card__img-wrap {
+  position: relative;
+  display: block;
+  overflow: hidden;             /* clip the overlay to image edges */
+  line-height: 0;               /* eliminate inline gap beneath img */
+}
+
+.image-card__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;             /* sharp corners – creepy, not bubbly */
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+/* Darkening overlay – fades in on hover. */
+.image-card__hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background var(--dur-fast) var(--ease-out);
+  pointer-events: none;
+}
+
+.image-card:hover .image-card__hover-overlay,
+.image-card:focus-visible .image-card__hover-overlay {
+  background: rgba(0, 0, 0, 0.38);
+}
+
+/* Subtle scale on hover to signal interactivity. */
+.image-card:hover .image-card__img,
+.image-card:focus-visible .image-card__img {
+  transform: scale(1.02);
+}
+
+/* Title below the image */
+.image-card__title {
+  margin: 0;
+  padding: 6px 4px 0;
+  font-family: var(--font-typewriter);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #ffffff;
+  line-height: 1.4;
+  /* Hard min-height prevents the card below from colliding with this text. */
+  min-height: 2em;
+}
+
+
+/* ==================================================================
+   IMAGE VIEWER (LIGHTBOX)
+   ================================================================== */
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;           /* above header (z: 50) and sidebar (z: 80) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Hidden state – no display:none so transitions can animate. */
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.image-viewer[data-state="open"] {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* ---- Backdrop (dim layer behind panel) ---- */
+.image-viewer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background var(--dur-base) var(--ease-out);
+  cursor: pointer;        /* visual cue that clicking closes the viewer */
+}
+
+.image-viewer[data-state="open"] .image-viewer__backdrop {
+  background: rgba(0, 0, 0, 0.82);
+}
+
+/* ---- Panel (image + chrome) ---- */
+.image-viewer__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 92vw;
+  max-height: 92vh;
+
+  /* Entry animation */
+  opacity: 0;
+  transform: scale(0.92);
+  transition:
+    opacity   var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+.image-viewer[data-state="open"] .image-viewer__panel {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ---- Top bar ---- */
+.image-viewer__topbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 6px;
+}
+
+.image-viewer__spacer { flex: 1; }
+
+/* Close button */
+.image-viewer__close {
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid var(--color-border-strong);
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 0;       /* sharp corners */
+  transition:
+    color      var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    border     var(--dur-fast) var(--ease-out);
+}
+
+.image-viewer__close:hover,
+.image-viewer__close:focus-visible {
+  color: var(--color-accent-bright);
+  background: rgba(179, 0, 0, 0.12);
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+/* ---- Image ---- */
+.image-viewer__img-wrap {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-viewer__img {
+  display: block;
+  max-width: 88vw;
+  max-height: 78vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0;       /* sharp corners */
+}
+
+/* ---- Footer / title ---- */
+.image-viewer__footer {
+  padding: 8px 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  /* FUTURE: space-between when metadata / action slots are populated */
+}
+
+.image-viewer__title {
+  font-family: var(--font-typewriter);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: #ffffff;
+}
+
+/* ---- Scroll lock helper (set on <body> by JS) ---- */
+body[data-viewer-open="true"] {
+  overflow: hidden;
+}

@@ -1,0 +1,114 @@
+/* ====================================================================
+   header.css - top title bar + nav row.
+   Hides on scroll-down (JS sets data-state="hidden").
+   The nav uses flex-wrap so it scales to any number of items.
+   ==================================================================== */
+
+.site-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: var(--z-header);
+
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 10, 10, 0.96) 0%,
+    rgba(10, 10, 10, 0.92) 70%,
+    rgba(10, 10, 10, 0.0) 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  padding: var(--header-pad-block) 1rem 2rem;
+  /* Space on the left so the title doesn't sit under the hamburger. */
+  padding-left: 80px;
+
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    opacity   var(--dur-base) var(--ease-out);
+  will-change: transform;
+}
+
+/* Hidden state set by JS when scrolling down. */
+.site-header[data-state="hidden"] {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---- Title ---- */
+.site-header__title-row {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.site-header__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--color-accent-bright);
+  /* Layered text-shadow for a subtle bleed/glow. */
+  text-shadow:
+    0 0 12px rgba(230, 0, 0, 0.55),
+    0 0 32px rgba(179, 0, 0, 0.35),
+    2px 2px 0 #000;
+  /* Faint ghosting effect using transform. */
+  transform: translateZ(0);
+  user-select: none;
+}
+
+/* ---- Nav row ---- */
+.site-header__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.site-header__nav-link {
+  font-family: var(--font-typewriter);
+  font-size: 0.95rem;
+  letter-spacing: 0.18em;
+  color: var(--color-text-secondary);
+  padding: 0.5rem 0.9rem;
+  border: 1px solid transparent;
+  position: relative;
+  transition:
+    color      var(--dur-fast) var(--ease-out),
+    border     var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.site-header__nav-link::before {
+  /* Bracket marks that fade in on hover. */
+  content: '[ ';
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.site-header__nav-link::after {
+  content: ' ]';
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.site-header__nav-link:hover,
+.site-header__nav-link:focus-visible {
+  color: var(--color-accent-bright);
+  outline: none;
+}
+.site-header__nav-link:hover::before,
+.site-header__nav-link:hover::after,
+.site-header__nav-link:focus-visible::before,
+.site-header__nav-link:focus-visible::after {
+  opacity: 1;
+}
+
+.site-header__nav-link.is-active {
+  color: var(--color-accent-bright);
+  border-color: var(--color-accent-dim);
+  background: rgba(179, 0, 0, 0.08);
+}

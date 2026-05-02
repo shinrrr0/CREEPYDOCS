@@ -1,0 +1,26 @@
+{# ====================================================================
+   header.html - title bar + nav.
+   The nav row scales to nav_sections length automatically (CSS flex).
+   ==================================================================== #}
+<header class="site-header" id="site-header" data-state="visible">
+
+  {# ---- Title row ---- #}
+  <div class="site-header__title-row">
+    <h1 class="site-header__title">CREEPYDOCS</h1>
+    {# Optional tagline slot - leave commented unless designers want it. #}
+    {# <p class="site-header__tagline">archive of the unverified</p> #}
+  </div>
+
+  {# ---- Nav row ---- #}
+  {# Renders one button per Config.NAV_SECTIONS entry. Add a section in
+     config.py and it appears here automatically. #}
+  <nav class="site-header__nav" aria-label="Primary">
+    {% for section in nav_sections %}
+      <a
+        class="site-header__nav-link {% if active_section == section.slug %}is-active{% endif %}"
+        href="{{ url_for('main.section', slug=section.slug) }}"
+      >{{ section.label }}</a>
+    {% endfor %}
+  </nav>
+
+</header>

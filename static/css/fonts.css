@@ -1,0 +1,19 @@
+/* ====================================================================
+   fonts.css - non-Google font face declarations.
+   "another danger" is the display font for the title. Drop the file
+   into /static/fonts/ and the @font-face below picks it up.
+   The font is freely available at dafont.com and similar archives.
+   ==================================================================== */
+
+@font-face {
+  font-family: 'AnotherDanger';
+  /* Place the file at static/fonts/another-danger.ttf (or .otf/.woff2) */
+  src: url('../fonts/another-danger.woff2') format('woff2'),
+       url('../fonts/another-danger.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* If the font file is missing, the title falls back to a horror-ish
+   stack so the page is still readable during development. */

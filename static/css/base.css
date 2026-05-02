@@ -1,0 +1,104 @@
+/* ====================================================================
+   base.css - design tokens, reset, body defaults.
+   All other CSS files should reference these variables.
+   ==================================================================== */
+
+:root {
+  /* ---- Colors ---- */
+  --color-bg-primary:   #0a0a0a;   /* page background */
+  --color-bg-secondary: #141414;   /* header/sidebar */
+  --color-bg-tertiary:  #1a1a1a;   /* content cards */
+  --color-bg-elevated:  #232323;   /* hover state */
+
+  --color-accent:        #b30000;  /* signature red */
+  --color-accent-bright: #e60000;  /* hover red */
+  --color-accent-dim:    #5c0000;  /* deep red, borders */
+  --color-accent-glow:   rgba(230, 0, 0, 0.35);
+
+  --color-text-primary:   #d8d8d8;
+  --color-text-secondary: #888888;
+  --color-text-muted:     #555555;
+
+  --color-border:        #262626;
+  --color-border-strong: #3a3a3a;
+
+  /* ---- Typography ---- */
+  --font-display:    'AnotherDanger', 'Creepster', 'Impact', sans-serif;
+  --font-typewriter: 'Special Elite', 'Courier New', ui-monospace, monospace;
+  --font-body:       'Montserrat', system-ui, sans-serif;
+
+  /* ---- Sizing / layout ---- */
+  --header-pad-block: 1.5rem;
+  --feed-max-width:   860px;
+  --content-collapsed-height: 220px;  /* clamp height for content blocks */
+  --sidebar-width: 320px;
+
+  /* ---- Motion ---- */
+  --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in:    cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:   160ms;
+  --dur-base:   320ms;
+  --dur-slow:   520ms;
+
+  /* ---- Z-index scale ---- */
+  --z-header:           50;
+  --z-sidebar:          80;
+  --z-sidebar-overlay:  70;
+  --z-sidebar-trigger: 100;   /* always on top */
+}
+
+/* ---- Minimal reset ---- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+ul { margin: 0; padding: 0; list-style: none; }
+img, svg { display: block; max-width: 100%; }
+
+/* ---- Body ---- */
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  /* Subtle film-grain via layered gradients - no image asset required. */
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(179, 0, 0, 0.05), transparent 50%),
+    radial-gradient(circle at 80% 90%, rgba(179, 0, 0, 0.04), transparent 60%);
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Lock scroll while sidebar is open. */
+  transition: overflow var(--dur-fast);
+}
+body[data-sidebar-open="true"] { overflow: hidden; }
+
+/* ---- Main feed wrapper ---- */
+.main-feed {
+  /* Push content below the header. The exact value matches the
+     header's natural height; tweak if the header grows. */
+  padding-top: 200px;
+  padding-bottom: 6rem;
+  min-height: 100vh;
+}
+
+.feed {
+  max-width: var(--feed-max-width);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.feed__empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-family: var(--font-typewriter);
+  letter-spacing: 0.1em;
+  padding: 4rem 0;
+}
+
+/* Mobile padding adjustment - the header is taller in proportion. */
+@media (max-width: 600px) {
+  .main-feed { padding-top: 180px; }
+}

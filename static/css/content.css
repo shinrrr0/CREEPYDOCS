@@ -1,0 +1,137 @@
+/* ====================================================================
+   content.css - story cards.
+   States are driven by [data-expanded] on the article element.
+   JS sets the toggle button visible only when the body overflows.
+   ==================================================================== */
+
+.content-block {
+  position: relative;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent-dim);
+  padding: 1.75rem 1.75rem 1rem;
+
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow   var(--dur-base) var(--ease-out),
+    transform    var(--dur-slow) var(--ease-out);
+}
+
+.content-block:hover {
+  border-color: var(--color-border-strong);
+  border-left-color: var(--color-accent);
+  box-shadow: 0 0 24px rgba(179, 0, 0, 0.12);
+}
+
+/* ---- Header ---- */
+.content-block__header {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.content-block__title {
+  font-family: var(--font-typewriter);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  color: var(--color-text-primary);
+  margin: 0 0 0.4rem 0;
+  line-height: 1.2;
+}
+
+.content-block__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: var(--font-typewriter);
+  font-size: 0.78rem;
+  letter-spacing: 0.15em;
+  color: var(--color-text-muted);
+}
+
+.content-block__author { font-style: italic; }
+
+/* ---- Body ---- */
+.content-block__body {
+  position: relative;
+  max-height: var(--content-collapsed-height);
+  overflow: hidden;
+  transition: max-height var(--dur-slow) var(--ease-out);
+}
+
+/* When expanded JS swaps max-height to a measured value (or a large
+   number) so the body grows. CSS just animates between the two. */
+.content-block[data-expanded="true"] .content-block__body {
+  /* Big ceiling - JS may set the real measured value inline as well. */
+  max-height: 9999px;
+}
+
+.content-block__text {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+}
+
+.content-block__text p {
+  margin: 0 0 1em 0;
+}
+.content-block__text p:last-child { margin-bottom: 0; }
+
+/* ---- Fade overlay ---- */
+.content-block__fade {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 80px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(26, 26, 26, 0) 0%,
+    var(--color-bg-tertiary) 90%
+  );
+  opacity: 1;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.content-block[data-expanded="true"] .content-block__fade {
+  opacity: 0;
+}
+
+/* ---- Toggle button ---- */
+.content-block__toggle {
+  display: flex;
+  margin: 1rem auto 0.25rem;
+  padding: 0.5rem 1.5rem;
+
+  font-family: var(--font-typewriter);
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+
+  transition:
+    color      var(--dur-fast) var(--ease-out),
+    border     var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    transform  var(--dur-fast) var(--ease-out);
+}
+
+.content-block__toggle:hover,
+.content-block__toggle:focus-visible {
+  color: var(--color-accent-bright);
+  border-color: var(--color-accent);
+  background: rgba(179, 0, 0, 0.08);
+  outline: none;
+}
+
+.content-block__toggle:active {
+  transform: scale(0.97);
+}
+
+/* Swap label text based on state. */
+.content-block__toggle [data-label-expanded]  { display: none; }
+.content-block[data-expanded="true"] .content-block__toggle [data-label-collapsed] { display: none; }
+.content-block[data-expanded="true"] .content-block__toggle [data-label-expanded]  { display: inline; }

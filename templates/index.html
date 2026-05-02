@@ -1,0 +1,16 @@
+{# index.html - feed of stories. #}
+{% extends 'base.html' %}
+
+{% block title %}CreepyDocs — archive{% endblock %}
+
+{% block content %}
+  <div class="feed">
+    {% if stories %}
+      {% for story in stories %}
+        {% include 'components/content_block.html' %}
+      {% endfor %}
+    {% else %}
+      <p class="feed__empty">— nothing here yet —</p>
+    {% endif %}
+  </div>
+{% endblock %}

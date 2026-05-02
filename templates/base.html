@@ -1,0 +1,50 @@
+{# ====================================================================
+   base.html - shell of every page.
+   Child pages override the `content` block. Components (header, sidebar)
+   live in templates/components/ and are included here.
+   ==================================================================== #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}CreepyDocs{% endblock %}</title>
+
+  {# Google Fonts: Montserrat (body) + Special Elite (typewriter headings).
+     The "another danger" display font is loaded locally from /static/fonts -
+     see fonts.css for the @font-face block. #}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
+
+  {# Stylesheets are split per concern. Order matters: base -> layout -> components -> motion. #}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/content.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}" />
+</head>
+<body>
+
+  {# Sidebar trigger button - fixed top-left, ALWAYS visible regardless
+     of scroll or sidebar state. Lives outside header on purpose. #}
+  {% include 'components/sidebar_trigger.html' %}
+
+  {# Sidebar drawer (hidden by default). #}
+  {% include 'components/sidebar.html' %}
+
+  {# Top header (title + nav). Hides on scroll-down via JS. #}
+  {% include 'components/header.html' %}
+
+  <main class="main-feed">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# Scripts split per feature. Loaded with `defer` so they run after parse. #}
+  <script defer src="{{ url_for('static', filename='js/header_scroll.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/content_expand.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

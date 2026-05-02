@@ -1,0 +1,19 @@
+{# ====================================================================
+   sidebar_trigger.html - hamburger button.
+   Stays fixed at top-left for the entire page lifetime. The button
+   itself is decoupled from the sidebar so it doesn't move with the
+   header on scroll. JS toggles `body[data-sidebar-open]`.
+   ==================================================================== #}
+<button
+  class="sidebar-trigger"
+  id="sidebar-trigger"
+  type="button"
+  aria-label="Open menu"
+  aria-controls="sidebar"
+  aria-expanded="false"
+>
+  {# Three lines. Animated to an X when open via CSS. #}
+  <span class="sidebar-trigger__line"></span>
+  <span class="sidebar-trigger__line"></span>
+  <span class="sidebar-trigger__line"></span>
+</button>

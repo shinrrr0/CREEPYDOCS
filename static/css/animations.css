@@ -1,0 +1,53 @@
+/* ====================================================================
+   animations.css - entrance + ambient motion.
+   Keep effects opt-in via classes/data attributes so they're easy
+   to disable per-component.
+   ==================================================================== */
+
+/* ---- Page entrance ---- */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feed > .content-block {
+  animation: fadeUp var(--dur-slow) var(--ease-out) both;
+}
+
+/* Stagger entrance of the first few cards. */
+.feed > .content-block:nth-child(1) { animation-delay: 0.05s; }
+.feed > .content-block:nth-child(2) { animation-delay: 0.15s; }
+.feed > .content-block:nth-child(3) { animation-delay: 0.25s; }
+.feed > .content-block:nth-child(4) { animation-delay: 0.35s; }
+.feed > .content-block:nth-child(5) { animation-delay: 0.45s; }
+
+/* ---- Header title flicker ---- */
+/* Subtle CRT-style flicker. Keep amplitude very low so it reads
+   as atmosphere, not a distraction. Disabled for users who request
+   reduced motion below. */
+@keyframes titleFlicker {
+  0%, 92%, 100% { opacity: 1; }
+  93%           { opacity: 0.85; }
+  94%           { opacity: 1; }
+  96%           { opacity: 0.92; }
+}
+
+.site-header__title {
+  animation: titleFlicker 6s infinite;
+}
+
+/* ---- Reduced-motion fallback ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

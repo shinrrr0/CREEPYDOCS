@@ -1,0 +1,48 @@
+{# ====================================================================
+   sidebar.html - slide-in drawer.
+   Two regions:
+     1. Settings (placeholder - leave room for future controls).
+     2. Sections list (mirrors header nav for thumb-reach access).
+   ==================================================================== #}
+
+{# Backdrop dims the page and closes the sidebar on click. #}
+<div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+<aside
+  class="sidebar"
+  id="sidebar"
+  aria-hidden="true"
+  aria-label="Site navigation"
+>
+
+  {# ---- Settings placeholder ----
+       Reserved area for future controls (theme, font size, content
+       filters, etc). Keep markup here so layout doesn't shift when
+       real controls land. #}
+  <section class="sidebar__settings" aria-label="Settings">
+    <h2 class="sidebar__heading">SETTINGS</h2>
+    <div class="sidebar__settings-placeholder">
+      {# FUTURE: dark/red toggle, font-size slider, content filters,
+         "mark all read", etc. Drop real controls in here. #}
+      <p class="sidebar__placeholder-text">— no settings yet —</p>
+    </div>
+  </section>
+
+  <hr class="sidebar__divider" />
+
+  {# ---- Sections list ---- #}
+  <nav class="sidebar__nav" aria-label="Sections">
+    <h2 class="sidebar__heading">SECTIONS</h2>
+    <ul class="sidebar__nav-list">
+      {% for section in nav_sections %}
+        <li>
+          <a
+            class="sidebar__nav-link {% if active_section == section.slug %}is-active{% endif %}"
+            href="{{ url_for('main.section', slug=section.slug) }}"
+          >{{ section.label }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+</aside>

@@ -10,7 +10,7 @@ from flask import Flask
 
 from config import Config
 from routes.main import main_bp
-from routes.gallery import gallery_bp  # image masonry feed
+from routes.gallery import gallery_bp  # лента изображений
 
 
 def create_app(config_class: type = Config) -> Flask:

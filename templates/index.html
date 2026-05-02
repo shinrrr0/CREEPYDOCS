@@ -1,7 +1,7 @@
 {# index.html - feed of stories. #}
 {% extends 'base.html' %}
 
-{% block title %}CreepyDocs — archive{% endblock %}
+{% block title %}CreepyDocs — архив{% endblock %}
 
 {% block content %}
   <div class="feed">
@@ -10,7 +10,7 @@
         {% include 'components/content_block.html' %}
       {% endfor %}
     {% else %}
-      <p class="feed__empty">— nothing here yet —</p>
+      <p class="feed__empty">— здесь ещё ничего нет —</p>
     {% endif %}
   </div>
 {% endblock %}

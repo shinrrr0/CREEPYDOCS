@@ -27,4 +27,5 @@ class Config:
     NAV_SECTIONS = [
         {"slug": "stories",   "label": "ИСТОРИИ"},
         {"slug": "gallery",   "label": "ГАЛЕРЕЯ",   "href": "/gallery"},
+        {"slug": "blog",      "label": "БЛОГ",      "href": "/blog"},
     ]

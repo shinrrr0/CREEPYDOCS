@@ -1,0 +1,198 @@
+/* ====================================================================
+   blog.css - blog post feed + creation form.
+   ==================================================================== */
+
+.blog-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.blog-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.blog__empty {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin: 2rem 0;
+}
+
+/* ---- Post Creation Form ---- */
+.post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: rgba(20, 20, 20, 0.6);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.post-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.post-form__textarea {
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid rgba(200, 200, 200, 0.2);
+  border-radius: 4px;
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  padding: 0.75rem;
+  resize: vertical;
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+
+.post-form__textarea:focus {
+  outline: none;
+  border-color: var(--color-accent-bright);
+  box-shadow: 0 0 8px rgba(230, 0, 0, 0.2);
+}
+
+.post-form__textarea::placeholder {
+  color: rgba(200, 200, 200, 0.4);
+}
+
+/* ---- File upload ---- */
+.post-form__file-group {
+  position: relative;
+}
+
+.post-form__file-input {
+  display: none;
+}
+
+.post-form__file-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(50, 50, 50, 0.6);
+  border: 1px dashed rgba(200, 200, 200, 0.3);
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+
+.post-form__file-label:hover {
+  background: rgba(60, 60, 60, 0.8);
+  border-color: rgba(200, 200, 200, 0.5);
+}
+
+.post-form__file-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+}
+
+.post-form__file-text {
+  font-size: 0.95rem;
+}
+
+.post-form__file-name {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-accent-bright);
+  margin-top: 0.25rem;
+}
+
+/* ---- Error message ---- */
+.post-form__error {
+  background: rgba(200, 0, 0, 0.15);
+  border: 1px solid rgba(230, 0, 0, 0.4);
+  border-radius: 4px;
+  color: rgba(255, 100, 100, 0.9);
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  animation: slideDown 0.3s var(--ease-out);
+}
+
+/* ---- Submit button ---- */
+.post-form__submit {
+  background: linear-gradient(135deg, rgba(230, 0, 0, 0.8), rgba(179, 0, 0, 0.6));
+  border: 1px solid rgba(230, 0, 0, 0.5);
+  border-radius: 4px;
+  color: #fff;
+  font-family: var(--font-typewriter);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+.post-form__submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(230, 0, 0, 1), rgba(179, 0, 0, 0.8));
+  box-shadow: 0 0 12px rgba(230, 0, 0, 0.4);
+}
+
+.post-form__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- Post Card ---- */
+.post-card {
+  background: rgba(20, 20, 20, 0.5);
+  border-left: 3px solid var(--color-accent-bright);
+  border-radius: 4px;
+  padding: 1.5rem;
+  transition: background var(--dur-base) var(--ease-out);
+}
+
+.post-card:hover {
+  background: rgba(30, 30, 30, 0.7);
+}
+
+.post-card__time {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.75rem;
+  font-family: var(--font-typewriter);
+}
+
+.post-card__image {
+  display: block;
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.post-card__text {
+  margin: 1rem 0 0 0;
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* ---- Animations ---- */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

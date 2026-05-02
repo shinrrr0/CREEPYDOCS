@@ -11,6 +11,7 @@ from flask import Flask
 from config import Config
 from routes.main import main_bp
 from routes.gallery import gallery_bp  # лента изображений
+from routes.blog import blog_bp  # блог посты
 
 
 def create_app(config_class: type = Config) -> Flask:
@@ -22,6 +23,7 @@ def create_app(config_class: type = Config) -> Flask:
     # (e.g. auth_bp, admin_bp, api_bp).
     app.register_blueprint(main_bp)
     app.register_blueprint(gallery_bp)  # /gallery route
+    app.register_blueprint(blog_bp)     # /blog route
 
     # FUTURE: initialize SQLAlchemy here once models/database.py is wired up:
     #     from models.database import db

@@ -1,13 +1,13 @@
 /* ====================================================================
-   header_scroll.js - hide header on scroll-down, show on scroll-up.
-   Sets data-state="visible" / "hidden" on #site-header. CSS handles
-   the actual transform.
+   header_scroll.js - hide title on scroll-down, keep nav visible.
+   Sets data-state="visible" / "compact" on #site-header. CSS handles
+   the actual transform (title hides, padding adjusts).
    ==================================================================== */
 
 (function () {
   'use strict';
 
-  const HIDE_AFTER_PX = 80;   // don't hide until user has scrolled this far
+  const HIDE_AFTER_PX = 80;   // don't collapse until user has scrolled this far
   const DELTA_THRESHOLD = 6;  // px of movement required before reacting
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -21,11 +21,13 @@
       const currentY = window.scrollY;
       const delta = currentY - lastScrollY;
 
-      // Always show near the top of the page.
+      // Always show full header near the top of the page.
       if (currentY < HIDE_AFTER_PX) {
         header.dataset.state = 'visible';
       } else if (Math.abs(delta) > DELTA_THRESHOLD) {
-        header.dataset.state = delta > 0 ? 'hidden' : 'visible';
+        // Scroll down: compact (nav stays, title hides)
+        // Scroll up: show full header
+        header.dataset.state = delta > 0 ? 'compact' : 'visible';
       }
 
       lastScrollY = currentY;

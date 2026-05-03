@@ -1,12 +1,17 @@
 """
 Application configuration.
 
-NAV_SECTIONS is the single source of truth for the site's sections.
-The header and the sidebar both read it, so the navigation panel scales
-automatically with whatever you put here.
+NAV_SECTIONS is the single source of truth for the site's nav. Header
+and sidebar both read it, so the navigation panel scales automatically
+with whatever you put here.
 """
 
 import os
+from pathlib import Path
+
+# Project root - used to locate the SQLite file in instance/.
+_PROJECT_DIR = Path(__file__).resolve().parent
+_INSTANCE_DIR = _PROJECT_DIR / "instance"
 
 
 class Config:
@@ -14,14 +19,23 @@ class Config:
 
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
-    # FUTURE: SQLAlchemy DB URI lives here once we wire it up.
-    # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///creepydocs.db")
-    # SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # ------------------------------------------------------------------
+    # Database.
+    # Default: SQLite file at instance/creepydocs.db (Flask creates the
+    # instance/ folder for us). Override with the DATABASE_URL env var
+    # for Postgres / MySQL / etc.
+    # ------------------------------------------------------------------
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DATABASE_URL",
+        f"sqlite:///{_INSTANCE_DIR / 'creepydocs.db'}",
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Echoes SQL to stdout when True - useful in dev, noisy in prod.
+    SQLALCHEMY_ECHO = bool(int(os.environ.get("SQLALCHEMY_ECHO", "0")))
 
     # ------------------------------------------------------------------
     # Site sections - drives both header nav and sidebar nav.
-    # Add/remove items freely; the UI scales to match.
-    # `slug` is used in URLs; `label` is displayed.
+    # `slug` is used in URLs and as Story.section_slug; `label` is shown.
     # ------------------------------------------------------------------
     NAV_SECTIONS = [
         {"slug": "stories",   "label": "STORIES"},
@@ -31,3 +45,8 @@ class Config:
         {"slug": "submit",    "label": "SUBMIT"},
         {"slug": "about",     "label": "ABOUT"},
     ]
+
+    @classmethod
+    def valid_section_slugs(cls) -> set[str]:
+        """Helper for repository write-side validation."""
+        return {s["slug"] for s in cls.NAV_SECTIONS}

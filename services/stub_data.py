@@ -1,18 +1,19 @@
 """
-Stub data source.
+Seed fixtures.
 
-Returns hard-coded Story objects so the front end can be developed before
-the DB is online. The repository layer reads from this stub and will later
-swap in real DB queries without changing its public interface.
+Used by services/seeder.py to populate dev/test databases with sample
+content. Edit STORY_FIXTURES to add more sample stories. Each fixture
+is a plain dict whose keys map directly to Story.__init__ kwargs.
+
+This file is dev/test data only - it is not consulted at runtime once
+the database is seeded.
 """
 
 from datetime import datetime, timedelta
-from typing import List
-
-from models.story import Story
 
 
-# Long enough on purpose so the "expand" affordance is exercised.
+# Long enough on purpose so the "expand" affordance is exercised on
+# the front end.
 _LONG_TEXT_1 = (
     "It started with the static. Just a faint hiss behind every phone call, "
     "every voicemail, every recording I made. At first I thought it was the "
@@ -43,7 +44,6 @@ _LONG_TEXT_1 = (
     "Clean audio, she said. No static at all. She asked if I was getting "
     "enough sleep. I said yes. I lied."
 )
-
 
 _LONG_TEXT_2 = (
     "The hiking trail behind my grandfather's farm had a rule: if you saw "
@@ -76,7 +76,6 @@ _LONG_TEXT_2 = (
     "in the soft dirt where it had stood."
 )
 
-
 _LONG_TEXT_3 = (
     "We found the tape in a box of my aunt's things, labeled in her "
     "handwriting: DO NOT WATCH. Naturally we watched it. It was a home "
@@ -94,37 +93,31 @@ _LONG_TEXT_3 = (
 )
 
 
-def get_all_stories_stub() -> List[Story]:
-    """Return a small list of stub stories. Replace with a real DB query later."""
-    base = datetime.utcnow()
-    return [
-        Story(
-            id=1,
-            title="THE STATIC ON THE LINE",
-            body=_LONG_TEXT_1,
-            author="anonymous",
-            created_at=base - timedelta(days=2),
-        ),
-        Story(
-            id=2,
-            title="THE DEER ON THE RIDGE",
-            body=_LONG_TEXT_2,
-            author="m. h.",
-            created_at=base - timedelta(days=5),
-        ),
-        Story(
-            id=3,
-            title="DO NOT WATCH",
-            body=_LONG_TEXT_3,
-            author="found tape archive",
-            created_at=base - timedelta(days=11),
-        ),
-    ]
+_NOW = datetime.utcnow()
 
-
-def get_story_by_id_stub(story_id: int) -> Story | None:
-    """Single-story lookup stub."""
-    for s in get_all_stories_stub():
-        if s.id == story_id:
-            return s
-    return None
+# Each fixture maps directly to Story.__init__ kwargs. The seeder may
+# also generate a placeholder image and attach it - look up the story
+# by title in seeder._SEED_IMAGES.
+STORY_FIXTURES = [
+    {
+        "title": "THE STATIC ON THE LINE",
+        "body": _LONG_TEXT_1,
+        "author": "anonymous",
+        "section_slug": "stories",
+        "created_at": _NOW - timedelta(days=2),
+    },
+    {
+        "title": "THE DEER ON THE RIDGE",
+        "body": _LONG_TEXT_2,
+        "author": "m. h.",
+        "section_slug": "stories",
+        "created_at": _NOW - timedelta(days=5),
+    },
+    {
+        "title": "DO NOT WATCH",
+        "body": _LONG_TEXT_3,
+        "author": "found tape archive",
+        "section_slug": "archive",
+        "created_at": _NOW - timedelta(days=11),
+    },
+]

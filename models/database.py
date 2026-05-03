@@ -1,20 +1,24 @@
 """
-Database setup.
+SQLAlchemy database instance.
 
-Currently inactive - we use an in-memory stub via services/stub_data.py.
-When ready, uncomment the SQLAlchemy lines below and call db.init_app(app)
-from create_app() in app.py.
+Single source of truth for the `db` object. Models inherit from
+`db.Model`; the Flask factory calls `db.init_app(app)` to bind it
+to the active app config.
+
+We use the SQLAlchemy 2.x style with a typed DeclarativeBase so models
+get proper type hints (`Mapped[str]`, `mapped_column`, ...).
 """
 
-# FUTURE: replace this stub with a real SQLAlchemy instance.
-#
-# from flask_sqlalchemy import SQLAlchemy
-# db = SQLAlchemy()
-#
-# Then in app.py:
-#     from models.database import db
-#     db.init_app(app)
-#
-# And run migrations or db.create_all() inside an app context.
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 
-db = None  # placeholder so imports do not fail elsewhere
+
+class Base(DeclarativeBase):
+    """Project-wide declarative base.
+
+    Add cross-model defaults here later (e.g. naming conventions for
+    indexes/constraints, soft-delete mixins, automatic `updated_at`).
+    """
+
+
+db = SQLAlchemy(model_class=Base)

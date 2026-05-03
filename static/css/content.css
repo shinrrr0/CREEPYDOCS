@@ -135,3 +135,68 @@
 .content-block__toggle [data-label-expanded]  { display: none; }
 .content-block[data-expanded="true"] .content-block__toggle [data-label-collapsed] { display: none; }
 .content-block[data-expanded="true"] .content-block__toggle [data-label-expanded]  { display: inline; }
+
+/* ---- Cover image ----
+   Rendered above the body when the story has a cover_image. Keeps
+   aspect ratio, fades to dark at the bottom edge to feel embedded
+   in the card rather than glued on top. */
+.content-block__cover {
+  margin: 0 -1.75rem 1.25rem;          /* bleed to card edges */
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-accent-dim);
+  background: #000;
+}
+.content-block__cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 360px;
+  object-fit: cover;
+  filter: saturate(0.75) contrast(1.1);
+  transition: filter var(--dur-base) var(--ease-out),
+              transform var(--dur-slow) var(--ease-out);
+}
+.content-block:hover .content-block__cover img {
+  filter: saturate(0.9) contrast(1.15);
+  transform: scale(1.02);
+}
+.content-block__cover::after {
+  /* Subtle red vignette for atmosphere. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 60%,
+    rgba(179, 0, 0, 0.18) 100%
+  );
+}
+
+/* ---- Gallery (non-cover images) ----
+   Sits below the toggle. Auto-fit grid - looks good with 1 image
+   or many. Click-to-enlarge can be wired up later by JS. */
+.content-block__gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+.content-block__gallery-item {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: #000;
+}
+.content-block__gallery-item img {
+  display: block;
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.content-block__gallery-item:hover img {
+  transform: scale(1.06);
+}

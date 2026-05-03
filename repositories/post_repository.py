@@ -18,14 +18,14 @@ class PostRepository:
     # Read methods
     # ------------------------------------------------------------------
     @staticmethod
-    def list_all(limit: Optional[int] = None) -> List[Post]:
-        """Return all posts, newest first. Limit caps result."""
+    def list_by_blog(blog_id: int, limit: Optional[int] = None) -> List[Post]:
+        """Return all posts for a blog, newest first. Limit caps result."""
         # FUTURE (SQLAlchemy):
-        #     query = Post.query.order_by(Post.created_at.desc())
+        #     query = Post.query.filter_by(blog_id=blog_id).order_by(Post.created_at.desc())
         #     if limit:
         #         query = query.limit(limit)
         #     return query.all()
-        return blog_stub_data.get_all_posts_stub(limit=limit)
+        return blog_stub_data.get_posts_for_blog(blog_id, limit=limit)
 
     @staticmethod
     def get_by_id(post_id: int) -> Optional[Post]:
@@ -38,16 +38,17 @@ class PostRepository:
     # Write methods
     # ------------------------------------------------------------------
     @staticmethod
-    def create(text: Optional[str] = None,
+    def create(blog_id: int,
+               text: Optional[str] = None,
                image_filename: Optional[str] = None) -> Optional[Post]:
         """
-        Create a new post. At least one of text/image must be provided.
+        Create a new post in a blog. At least one of text/image must be provided.
         Validation happens here, not in the stub.
 
         Returns the created Post, or None if validation fails.
 
         FUTURE (SQLAlchemy):
-            post = Post(text=text, image_filename=image_filename)
+            post = Post(blog_id=blog_id, text=text, image_filename=image_filename)
             db.session.add(post)
             db.session.commit()
             return post
@@ -55,7 +56,7 @@ class PostRepository:
         if not text and not image_filename:
             return None
 
-        return blog_stub_data.create_post_stub(text=text, image_filename=image_filename)
+        return blog_stub_data.create_post_stub(blog_id=blog_id, text=text, image_filename=image_filename)
 
     @staticmethod
     def delete(post_id: int) -> bool:

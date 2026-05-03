@@ -1,5 +1,6 @@
 /* ====================================================================
    blog.js - blog post creation, file upload, AJAX submission.
+   Each blog has its own form with blog_id in data attribute.
    ==================================================================== */
 
 (function () {
@@ -8,6 +9,12 @@
   document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('post-form');
     if (!form) return;
+
+    const blogId = form.dataset.blogId;
+    if (!blogId) {
+      console.error('Blog ID not found in form data');
+      return;
+    }
 
     const textarea = form.querySelector('textarea[name="text"]');
     const fileInput = form.querySelector('input[name="image"]');
@@ -72,8 +79,9 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Отправляю...';
 
-      // POST to API
-      fetch('/api/blog/post', {
+      // POST to API - use blog_id in URL
+      const apiUrl = `/api/blog/${blogId}/post`;
+      fetch(apiUrl, {
         method: 'POST',
         body: formData,
       })

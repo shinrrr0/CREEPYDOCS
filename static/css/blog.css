@@ -2,10 +2,45 @@
    blog.css - blog post feed + creation form.
    ==================================================================== */
 
+/* ---- Header: random blog button ---- */
+.site-header__nav-link--random-blog {
+  margin-left: 0.5rem;
+}
+
+/* ---- Blog wrapper & header ---- */
 .blog-wrapper {
   max-width: 600px;
   margin: 0 auto;
   padding: 0 1rem;
+}
+
+.blog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(20, 20, 20, 0.4);
+  border-radius: 4px;
+}
+
+.blog-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--color-accent-bright);
+  font-family: var(--font-typewriter);
+}
+
+.blog-header__random-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.blog-header__random-link:hover {
+  color: var(--color-accent-bright);
 }
 
 .blog-feed {

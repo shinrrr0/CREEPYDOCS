@@ -17,11 +17,12 @@ class Post:
     """A single blog post."""
 
     id: int
+    blog_id: int                        # which blog (1..MAX_BLOGS)
     text: Optional[str] = None          # post body text (can be None if image-only)
     image_filename: Optional[str] = None  # relative to static/images/blog/ (can be None if text-only)
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=datetime.utcnow)  # timestamp of creation
 
-    # FUTURE fields:
+    # FUTURE fields to add when extending:
     #   author: str
     #   likes_count: int
     #   comments_count: int

@@ -1,10 +1,12 @@
 """
 Gallery blueprint: image masonry feed.
 
-Thin view functions – fetch data through ImageRepository, pass to templates.
-Business logic (filtering, pagination, ordering) lives in the repository
-and service layers, not here.
+Thin view functions - fetch data through ImageRepository, pass to
+templates. Business logic (filtering, pagination, ordering) lives in
+the repository, not here.
 """
+
+import random
 
 from flask import Blueprint, current_app, render_template
 
@@ -16,8 +18,11 @@ gallery_bp = Blueprint("gallery", __name__)
 
 @gallery_bp.route("/gallery")
 def gallery():
-    """Masonry image feed – all gallery images in random order."""
-    images = ImageRepository.list_all()
+    """Masonry image feed - all gallery images in shuffled order."""
+    images = ImageRepository.list_gallery()
+    # Shuffle for the organic masonry feel; ordering in the DB is just
+    # a deterministic tie-breaker so two visits look different.
+    random.shuffle(images)
     return render_template(
         "gallery.html",
         images=images,
@@ -26,8 +31,7 @@ def gallery():
     )
 
 
-# FUTURE routes to add:
-#   @gallery_bp.route("/gallery/<int:image_id>")         – full detail page
-#   @gallery_bp.route("/api/gallery")                    – JSON for infinite scroll
-#   @gallery_bp.route("/api/gallery/page/<int:page>")    – paginated JSON
-#   @gallery_bp.route("/gallery/upload", methods=["POST"])  – image submission
+# FUTURE routes:
+#   GET  /gallery/<int:image_id>            full detail page
+#   GET  /api/gallery                       JSON for infinite scroll
+#   POST /gallery/upload                    image submission

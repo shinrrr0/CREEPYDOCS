@@ -1,58 +1,144 @@
 # CreepyDocs
 
-Flask-based archive of creepypastas. Black-grey-red palette, modular
-codebase intended for parallel development.
+Flask + SQLAlchemy archive of creepypastas with a public image gallery
+and a multi-blog area. Black-grey-red palette, modular codebase intended
+for parallel development.
 
 ## Run locally
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate     # Windows: .venv\Scripts\activate
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python app.py
+
+# Database (one-time, then re-run seed-db whenever fixtures change):
+export FLASK_APP=app:create_app    # Windows: set FLASK_APP=app:create_app
+flask init-db                      # create tables
+flask seed-db                      # stories + ingest static gallery + sample posts
+
+python app.py                      # http://127.0.0.1:5000
 ```
 
-Then open `http://127.0.0.1:5000`.
+The default DB is SQLite at `instance/creepydocs.db`. Override with the
+`DATABASE_URL` env var to point at Postgres / MySQL / etc.
+
+## CLI
+
+| Command                       | Effect                                                     |
+|-------------------------------|------------------------------------------------------------|
+| `flask init-db`               | Create tables (idempotent).                                |
+| `flask seed-db`               | Insert fixtures + ingest gallery folder (idempotent).      |
+| `flask seed-db --force`       | Replace fixture rows whose titles match (destructive).     |
+| `flask seed-db --skip-gallery`| Skip ingest of `static/images/gallery/`.                   |
+| `flask seed-db --skip-posts`  | Skip blog post fixtures.                                   |
+| `flask reset-db`              | Drop everything, recreate, re-seed (destructive).          |
 
 ## Project layout
 
 ```
-app.py                   # Flask factory + entry point
-config.py                # Config; NAV_SECTIONS drives header & sidebar
-models/                  # Domain types (Story dataclass; later SQLAlchemy)
-repositories/            # DB access wrappers - swap stub for real DB here
-services/                # Non-DB business logic + the current stub data
-routes/                  # Flask blueprints (one per feature area)
-templates/
-  base.html              # Page shell
-  components/            # header, sidebar, sidebar_trigger, content_block
-  index.html             # Feed page
-static/
-  css/                   # base, fonts, header, sidebar, content, animations
-  js/                    # main, header_scroll, sidebar, content_expand
-  fonts/                 # Drop "another danger" font file here
+app.py                   Flask factory + entry point
+config.py                Config: DB URI, NAV_SECTIONS, MAX_BLOGS
+cli.py                   Click commands
+
+models/
+  database.py            SQLAlchemy `db` instance + DeclarativeBase
+  story.py               Story ORM model (+ cover_image / gallery_images)
+  post.py                Post ORM model (blog posts)
+  image.py               Image ORM model (binary blobs, multi-owner)
+
+repositories/
+  story_repository.py    Story DB access
+  post_repository.py     Post DB access (creates Post + Image atomically)
+  image_repository.py    Image DB access (per-owner helper methods)
+
+services/
+  stub_data.py           STORY_FIXTURES + BLOG_POST_FIXTURES
+  seeder.py              Inserts fixtures + ingests gallery folder
+
+routes/
+  main.py                /  and  /section/<slug>            (story feed)
+  gallery.py             /gallery                            (masonry)
+  blog.py                /blog/random, /blog/<id>, POST API  (multi-blog)
+  images.py              /image/<id>                         (binary serve)
+
+templates/               base.html + components/ + per-page templates
+static/                  css/, js/, fonts/, images/ (seed source)
 ```
+
+## Data model
+
+```
+stories                                 posts
+  id                                      id
+  title                                   blog_id (indexed)
+  body                                    text (nullable)
+  author                                  created_at
+  section_slug (indexed)                 └──> images (cascade)
+  created_at (indexed)
+  └──> images (cascade)
+
+images
+  id
+  story_id  (FK->stories, ON DELETE CASCADE, nullable)
+  post_id   (FK->posts,   ON DELETE CASCADE, nullable)
+  is_gallery (bool, indexed)   show in /gallery feed
+  is_cover   (bool)            mark as story cover
+  filename, mime_type, title, alt_text, width, height, position
+  data (BLOB)
+  created_at (indexed)
+```
+
+The same `images` table serves four roles, distinguished by which FK /
+flag is set:
+
+| Role             | Condition                                    |
+|------------------|----------------------------------------------|
+| Story image      | `story_id IS NOT NULL`                       |
+| Story cover      | `story_id IS NOT NULL AND is_cover = TRUE`   |
+| Blog post image  | `post_id IS NOT NULL`                        |
+| Public gallery   | `is_gallery = TRUE` (FKs may be null)        |
+| Standalone asset | all FKs null and `is_gallery = FALSE`        |
+
+`Image.url` returns `url_for('images.serve', image_id=self.id)` so
+templates never construct asset paths themselves.
+
+## How feature areas talk to the DB
+
+- **Stories** (`/`, `/section/<slug>`):
+  `StoryRepository.list_all` / `list_by_section`. Each Story exposes
+  `.cover_image` and `.gallery_images` for the template.
+- **Gallery** (`/gallery`):
+  `ImageRepository.list_gallery()` returns rows where `is_gallery=True`.
+  Seeder ingests every supported file in `static/images/gallery/` on
+  first run.
+- **Blog** (`/blog/random`, `/blog/<id>`, `POST /api/blog/<id>/post`):
+  `PostRepository.create()` writes the Post and its (optional) Image
+  in one transaction; the upload's bytes are stored directly in the
+  `images` table - no new files written to disk by the request handler.
+  `post.image.url` points at the serve route.
+- **Image bytes**: `routes/images.py` returns the blob with proper
+  `Content-Type` and a year-long `Cache-Control: immutable` (image
+  contents are immutable per id).
 
 ## Where to add things
 
-- **New section in nav** → add a dict to `Config.NAV_SECTIONS`. Header +
-  sidebar both update; a `/section/<slug>` route exists already.
-- **Real DB** → uncomment Flask-SQLAlchemy in `requirements.txt` +
-  `models/database.py`, replace stub calls in
-  `repositories/story_repository.py`. Public method signatures stay
-  the same so routes/templates don't need to change.
-- **New page** → add a route in `routes/`, a template extending
-  `base.html`. Reuse `components/content_block.html`.
-- **Comments / reactions on a story** → extend
-  `templates/components/content_block.html` below the marked
-  "FUTURE" comment. The card grows down naturally.
+- **New nav section** → add a dict to `Config.NAV_SECTIONS`. If it has
+  a custom URL, set `"href": "/whatever"`; otherwise it routes through
+  `main.section`.
+- **New repository method** → add it next to existing ones; routes and
+  templates depend only on public method names.
+- **New columns on Story / Post / Image** → edit the ORM model, then
+  either `flask reset-db` in dev or wire up Flask-Migrate / Alembic
+  (commented stub in `requirements.txt`).
+- **New page** → blueprint in `routes/`, template extending `base.html`,
+  reuse `components/content_block.html` / `image_card.html` /
+  `post_card.html` as appropriate.
 
-## What this iteration does NOT do (intentionally, per spec)
+## What this iteration does NOT do (intentionally)
 
-- No comments, reactions, ratings on stories.
-- No real database — `repositories/story_repository.py` reads from
-  `services/stub_data.py`.
-- No settings UI — sidebar reserves space for them only.
-- No auth, submissions, search.
+- No comments, reactions, ratings.
+- No auth / login / submissions form for stories.
+- No admin UI (image / post management is via repositories).
+- No pagination, search, infinite scroll.
 
-Each of those has a marked extension point in the relevant file.
+Each has a marked extension point in the relevant file.

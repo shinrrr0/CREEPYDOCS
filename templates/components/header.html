@@ -1,6 +1,8 @@
 {# ====================================================================
    header.html - title bar + nav.
    The nav row scales to nav_sections length automatically (CSS flex).
+   Sections may carry an explicit `href` to override the default
+   /section/<slug> URL (used by /gallery, /blog/random, etc.).
    ==================================================================== #}
 <header class="site-header" id="site-header" data-state="visible">
 
@@ -12,13 +14,8 @@
   </div>
 
   {# ---- Nav row ---- #}
-  {# Renders one button per Config.NAV_SECTIONS entry. Add a section in
-     config.py and it appears here automatically. #}
   <nav class="site-header__nav" aria-label="Primary">
     {% for section in nav_sections %}
-      {# Use section.href if provided, otherwise fall back to /section/<slug>.
-         This lets special pages (gallery, submit…) point to custom routes
-         without breaking the standard section pattern. #}
       <a
         class="site-header__nav-link {% if active_section == section.slug %}is-active{% endif %}"
         href="{{ section.get('href') or url_for('main.section', slug=section.slug) }}"

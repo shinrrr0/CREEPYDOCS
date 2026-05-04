@@ -1,15 +1,17 @@
 """
 Story repository.
 
-Public interface that routes call. Right now it delegates to the stub
-data source; later it will run SQLAlchemy queries. The signatures here
-are the contract - keep them stable when migrating to the real DB.
+Public method signatures match the previous stub-backed version so
+that routes and templates work without changes. Add new query shapes
+here rather than putting raw queries in routes.
 """
 
 from typing import List, Optional
 
+from sqlalchemy import select
+
+from models.database import db
 from models.story import Story
-from services import stub_data
 
 
 class StoryRepository:
@@ -21,45 +23,63 @@ class StoryRepository:
     @staticmethod
     def list_all(limit: Optional[int] = None) -> List[Story]:
         """Return stories ordered newest-first. `limit` caps the result."""
-        # FUTURE (SQLAlchemy):
-        #     query = Story.query.order_by(Story.created_at.desc())
-        #     if limit is not None:
-        #         query = query.limit(limit)
-        #     return query.all()
-        stories = sorted(
-            stub_data.get_all_stories_stub(),
-            key=lambda s: s.created_at,
-            reverse=True,
-        )
-        return stories[:limit] if limit is not None else stories
+        stmt = select(Story).order_by(Story.created_at.desc())
+        if limit is not None:
+            stmt = stmt.limit(limit)
+        return list(db.session.scalars(stmt))
 
     @staticmethod
     def get_by_id(story_id: int) -> Optional[Story]:
         """Single-story lookup. Returns None if not found."""
-        # FUTURE (SQLAlchemy):
-        #     return Story.query.get(story_id)
-        return stub_data.get_story_by_id_stub(story_id)
+        return db.session.get(Story, story_id)
 
     @staticmethod
-    def list_by_section(section_slug: str, limit: Optional[int] = None) -> List[Story]:
-        """Filter by section slug (matches Config.NAV_SECTIONS).
-
-        Currently returns everything because the stub has no section field.
-        Wire up properly once the schema includes `section_slug`.
-        """
-        # FUTURE (SQLAlchemy):
-        #     query = Story.query.filter_by(section_slug=section_slug) ...
-        return StoryRepository.list_all(limit=limit)
+    def list_by_section(
+        section_slug: str, limit: Optional[int] = None
+    ) -> List[Story]:
+        """Filter by section slug (matches Config.NAV_SECTIONS)."""
+        stmt = (
+            select(Story)
+            .where(Story.section_slug == section_slug)
+            .order_by(Story.created_at.desc())
+        )
+        if limit is not None:
+            stmt = stmt.limit(limit)
+        return list(db.session.scalars(stmt))
 
     # ------------------------------------------------------------------
-    # Write methods - placeholders, fill in once DB is live.
+    # Write methods
     # ------------------------------------------------------------------
     @staticmethod
-    def create(title: str, body: str, author: Optional[str] = None) -> Story:
-        """Create a new story. NotImplemented until DB is wired up."""
-        raise NotImplementedError("StoryRepository.create needs the DB layer")
+    def create(
+        title: str,
+        body: str,
+        author: Optional[str] = None,
+        section_slug: Optional[str] = None,
+    ) -> Story:
+        """Insert a new story and return the persisted instance."""
+        story = Story(
+            title=title,
+            body=body,
+            author=author,
+            section_slug=section_slug,
+        )
+        db.session.add(story)
+        db.session.commit()
+        return story
 
     @staticmethod
     def delete(story_id: int) -> bool:
-        """Delete by id. Returns True on success."""
-        raise NotImplementedError("StoryRepository.delete needs the DB layer")
+        """Delete a story (cascades to its images). Returns True on success."""
+        story = db.session.get(Story, story_id)
+        if story is None:
+            return False
+        db.session.delete(story)
+        db.session.commit()
+        return True
+
+    # FUTURE methods to add as features land:
+    #   update(story_id, **fields)            edit a story
+    #   list_by_tag(tag_name)                 filter by tag join
+    #   search(query)                         full-text / LIKE search
+    #   list_paginated(page, per_page)        pagination for the feed

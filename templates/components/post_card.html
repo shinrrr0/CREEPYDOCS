@@ -1,0 +1,24 @@
+{# post_card.html - single blog post card.
+
+   Expected context variable: `post` (models.post.Post ORM instance).
+   Image bytes live in the `images` table; the URL is constructed by
+   the model property so the template stays storage-agnostic.
+#}
+<article class="post-card" data-post-id="{{ post.id }}">
+  <time class="post-card__time" datetime="{{ post.created_at.isoformat() }}">
+    {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
+  </time>
+
+  {% if post.image %}
+    <img
+      src="{{ post.image.url }}"
+      alt="{{ post.image.alt_text or 'Post image' }}"
+      class="post-card__image"
+      loading="lazy"
+    />
+  {% endif %}
+
+  {% if post.text %}
+    <p class="post-card__text">{{ post.text }}</p>
+  {% endif %}
+</article>

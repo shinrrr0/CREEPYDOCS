@@ -1,33 +1,35 @@
 {# ====================================================================
    image_card.html - single tile in the masonry grid.
 
-   Expected context variable: `image` (models.image.Image instance).
+   Expected context variable: `image` (models.image.Image instance from
+   the DB layer). Bytes are served by routes/images.py, so the URL
+   comes from `image.url` rather than a static-file path.
 
-   data-* attributes carry all info the JS viewer needs –
-   no extra API calls required to open the lightbox.
+   data-* attributes carry all info the JS viewer needs - no extra API
+   calls required to open the lightbox.
    ==================================================================== #}
 <article
   class="image-card"
   data-image-id="{{ image.id }}"
-  data-image-src="{{ url_for('static', filename='images/gallery/' + image.filename) }}"
-  data-image-title="{{ image.title }}"
+  data-image-src="{{ image.url }}"
+  data-image-title="{{ image.display_title }}"
   role="button"
   tabindex="0"
-  aria-label="View image: {{ image.title }}"
+  aria-label="View image: {{ image.display_title }}"
 >
   {# Wrapper keeps the overlay scoped to the image area only. #}
   <div class="image-card__img-wrap">
     <img
       class="image-card__img"
-      src="{{ url_for('static', filename='images/gallery/' + image.filename) }}"
-      alt="{{ image.alt or image.title }}"
+      src="{{ image.url }}"
+      alt="{{ image.alt_text or image.display_title }}"
       loading="lazy"
     />
-    {# Semi-transparent darkening layer – opacity driven by CSS :hover. #}
+    {# Semi-transparent darkening layer - opacity driven by CSS :hover. #}
     <div class="image-card__hover-overlay" aria-hidden="true"></div>
   </div>
 
-  {# Title sits below the image with breathing room so it never
-     bleeds into the card below. #}
-  <p class="image-card__title">{{ image.title }}</p>
+  {# Title sits below the image with breathing room so it never bleeds
+     into the card below. #}
+  <p class="image-card__title">{{ image.display_title }}</p>
 </article>

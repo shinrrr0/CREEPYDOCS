@@ -1,0 +1,39 @@
+{# ====================================================================
+   blog.html - blog post feed with creation form for a specific blog.
+   Extends base.html; overrides the `content` block.
+   ==================================================================== #}
+{% extends 'base.html' %}
+
+{% block title %}CreepyDocs — Блог #{{ blog_id }}{% endblock %}
+
+{% block content %}
+<div class="blog-wrapper">
+
+  {# ---- Blog ID display ---- #}
+  <div class="blog-header">
+    <h2 class="blog-header__title">Блог #{{ blog_id }}</h2>
+    <a href="{{ url_for('blog.random_blog') }}" class="blog-header__random-link">
+      → другой блог
+    </a>
+  </div>
+
+  {# ---- Post creation form ---- #}
+  {% include 'components/post_form.html' %}
+
+  {# ---- Posts feed ---- #}
+  <div class="blog-feed" id="blog-feed">
+    {% if posts %}
+      {% for post in posts %}
+        {% include 'components/post_card.html' %}
+      {% endfor %}
+    {% else %}
+      <p class="blog__empty">— ещё нет постов —</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script defer src="{{ url_for('static', filename='js/blog.js') }}"></script>
+{% endblock %}

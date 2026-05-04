@@ -1,18 +1,18 @@
 """
-Stub data source.
+Seed fixtures.
 
-Returns hard-coded Story objects so the front end can be developed before
-the DB is online. The repository layer reads from this stub and will later
-swap in real DB queries without changing its public interface.
+Used by services/seeder.py to populate dev/test databases with sample
+content. Edit STORY_FIXTURES / BLOG_POST_FIXTURES to add more samples.
+Each fixture maps directly to the relevant model's __init__ kwargs.
+
+This file is dev/test data only - it is not consulted at runtime.
 """
 
 from datetime import datetime, timedelta
-from typing import List
-
-from models.story import Story
 
 
-# Long enough on purpose so the "expand" affordance is exercised.
+# Long enough on purpose so the "expand" affordance is exercised on
+# the front end.
 _LONG_TEXT_1 = (
     "It started with the static. Just a faint hiss behind every phone call, "
     "every voicemail, every recording I made. At first I thought it was the "
@@ -43,7 +43,6 @@ _LONG_TEXT_1 = (
     "Clean audio, she said. No static at all. She asked if I was getting "
     "enough sleep. I said yes. I lied."
 )
-
 
 _LONG_TEXT_2 = (
     "The hiking trail behind my grandfather's farm had a rule: if you saw "
@@ -76,7 +75,6 @@ _LONG_TEXT_2 = (
     "in the soft dirt where it had stood."
 )
 
-
 _LONG_TEXT_3 = (
     "We found the tape in a box of my aunt's things, labeled in her "
     "handwriting: DO NOT WATCH. Naturally we watched it. It was a home "
@@ -94,37 +92,60 @@ _LONG_TEXT_3 = (
 )
 
 
-def get_all_stories_stub() -> List[Story]:
-    """Return a small list of stub stories. Replace with a real DB query later."""
-    base = datetime.utcnow()
-    return [
-        Story(
-            id=1,
-            title="THE STATIC ON THE LINE",
-            body=_LONG_TEXT_1,
-            author="anonymous",
-            created_at=base - timedelta(days=2),
-        ),
-        Story(
-            id=2,
-            title="THE DEER ON THE RIDGE",
-            body=_LONG_TEXT_2,
-            author="m. h.",
-            created_at=base - timedelta(days=5),
-        ),
-        Story(
-            id=3,
-            title="DO NOT WATCH",
-            body=_LONG_TEXT_3,
-            author="found tape archive",
-            created_at=base - timedelta(days=11),
-        ),
-    ]
+_NOW = datetime.utcnow()
+
+# Each fixture maps directly to Story.__init__ kwargs. The seeder may
+# also generate a placeholder cover image and attach it - look up the
+# story by title in seeder._SEED_COVERS.
+STORY_FIXTURES = [
+    {
+        "title": "THE STATIC ON THE LINE",
+        "body": _LONG_TEXT_1,
+        "author": "anonymous",
+        "section_slug": "stories",
+        "created_at": _NOW - timedelta(days=2),
+    },
+    {
+        "title": "THE DEER ON THE RIDGE",
+        "body": _LONG_TEXT_2,
+        "author": "m. h.",
+        "section_slug": "stories",
+        "created_at": _NOW - timedelta(days=5),
+    },
+    {
+        "title": "DO NOT WATCH",
+        "body": _LONG_TEXT_3,
+        "author": "found tape archive",
+        "section_slug": "stories",
+        "created_at": _NOW - timedelta(days=11),
+    },
+]
 
 
-def get_story_by_id_stub(story_id: int) -> Story | None:
-    """Single-story lookup stub."""
-    for s in get_all_stories_stub():
-        if s.id == story_id:
-            return s
-    return None
+# A handful of demo posts so the blog feed isn't empty after `flask seed-db`.
+# The seeder picks two gallery image filenames at random to attach to two
+# of these - see seeder._SEED_BLOG_IMAGES.
+BLOG_POST_FIXTURES = [
+    {
+        "blog_id": 1,
+        "text": "Первый пост в первом блоге. Тут вечером слышно, как кто-то "
+                "ходит по чердаку. Я живу один.",
+        "created_at": _NOW - timedelta(hours=6),
+    },
+    {
+        "blog_id": 1,
+        "text": "Соседка снизу постучала в дверь и сказала, что мой кот вернулся. "
+                "У меня нет кота.",
+        "created_at": _NOW - timedelta(hours=2),
+    },
+    {
+        "blog_id": 7,
+        "text": "Семейное фото 2003 года. Никто не помнит, кто стоит четвёртым справа.",
+        "created_at": _NOW - timedelta(days=1),
+    },
+    {
+        "blog_id": 42,
+        "text": None,  # image-only post (seeder attaches one)
+        "created_at": _NOW - timedelta(hours=12),
+    },
+]

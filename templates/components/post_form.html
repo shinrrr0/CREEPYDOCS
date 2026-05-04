@@ -1,0 +1,34 @@
+{# post_form.html - form for creating a new blog post. #}
+<form class="post-form" id="post-form" enctype="multipart/form-data" data-blog-id="{{ blog_id }}">
+
+  <div class="post-form__group">
+    <textarea
+      class="post-form__textarea"
+      name="text"
+      placeholder="Напиши что-нибудь... (опционально)"
+      rows="4"
+    ></textarea>
+  </div>
+
+  <div class="post-form__group post-form__file-group">
+    <label class="post-form__file-label" for="post-image">
+      <svg class="post-form__file-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>
+      <span class="post-form__file-text">Добавить изображение</span>
+    </label>
+    <input
+      type="file"
+      id="post-image"
+      name="image"
+      class="post-form__file-input"
+      accept="image/*"
+    />
+    <span class="post-form__file-name" id="file-name"></span>
+  </div>
+
+  <div class="post-form__error" id="post-error" style="display: none;"></div>
+
+  <button type="submit" class="post-form__submit">Отправить</button>
+
+</form>

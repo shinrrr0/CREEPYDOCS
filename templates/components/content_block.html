@@ -9,7 +9,8 @@
      - JS auto-detects overflow and only shows the button when needed.
 
    Required context:
-     story  - object with .title, .body, optionally .author, .created_at
+     story  - object with .title, .body, optionally .author, .created_at,
+              and .cover_image / .gallery_images (DB-driven).
    ==================================================================== #}
 <article class="content-block" data-expanded="false">
 
@@ -30,6 +31,22 @@
       </div>
     {% endif %}
   </header>
+
+  {# Cover image - rendered above the body when the story has one.
+     Uses image.url (model property) so the URL scheme is owned by the
+     model, not the template. `loading="lazy"` keeps below-the-fold
+     covers from blocking initial paint. #}
+  {% if story.cover_image is defined and story.cover_image %}
+    <figure class="content-block__cover">
+      <img
+        src="{{ story.cover_image.url }}"
+        alt="{{ story.cover_image.alt_text or story.title }}"
+        {% if story.cover_image.width %}width="{{ story.cover_image.width }}"{% endif %}
+        {% if story.cover_image.height %}height="{{ story.cover_image.height }}"{% endif %}
+        loading="lazy"
+      />
+    </figure>
+  {% endif %}
 
   {# Body wrapper: JS reads data-collapsed-height to clamp height. #}
   <div class="content-block__body" data-role="body">
@@ -53,6 +70,23 @@
     <span class="content-block__toggle-label" data-label-collapsed>EXPAND</span>
     <span class="content-block__toggle-label" data-label-expanded>COLLAPSE</span>
   </button>
+
+  {# Optional gallery - non-cover images attached to the story. Renders
+     below the toggle so it appears once the body has been expanded
+     in long-form. #}
+  {% if story.gallery_images is defined and story.gallery_images %}
+    <div class="content-block__gallery">
+      {% for image in story.gallery_images %}
+        <figure class="content-block__gallery-item">
+          <img
+            src="{{ image.url }}"
+            alt="{{ image.alt_text or '' }}"
+            loading="lazy"
+          />
+        </figure>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   {# FUTURE: comments section, reactions, share button, tags row.
      Add new sub-components below this line - the card grows down. #}

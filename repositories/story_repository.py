@@ -8,7 +8,7 @@ here rather than putting raw queries in routes.
 
 from typing import List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from models.database import db
 from models.story import Story
@@ -32,6 +32,13 @@ class StoryRepository:
     def get_by_id(story_id: int) -> Optional[Story]:
         """Single-story lookup. Returns None if not found."""
         return db.session.get(Story, story_id)
+
+    @staticmethod
+    def get_random() -> Optional[Story]:
+        """Return one story chosen at random. Returns None if table is empty."""
+        # ORDER BY RANDOM() works in SQLite and PostgreSQL; for MySQL use RAND().
+        stmt = select(Story).order_by(func.random()).limit(1)
+        return db.session.scalars(stmt).first()
 
     @staticmethod
     def list_by_section(

@@ -6,12 +6,21 @@ it to templates. Don't put business logic here - extract it into
 services/ if it grows.
 """
 
-from flask import Blueprint, current_app, render_template, abort
+from flask import Blueprint, current_app, render_template, abort, redirect, url_for
 
+from repositories.comment_repository import CommentRepository
 from repositories.story_repository import StoryRepository
 
 
 main_bp = Blueprint("main", __name__)
+
+
+def _comment_counts_for(stories) -> dict:
+    """Pre-compute story_id -> comment count for a feed of stories.
+
+    One grouped query avoids an N+1 query pattern when rendering the feed.
+    """
+    return CommentRepository.counts_for_stories([s.id for s in stories])
 
 
 @main_bp.route("/")
@@ -21,9 +30,21 @@ def index():
     return render_template(
         "index.html",
         stories=stories,
+        comment_counts=_comment_counts_for(stories),
         nav_sections=current_app.config["NAV_SECTIONS"],
         active_section=None,
     )
+
+
+@main_bp.route("/story/random")
+def random_story():
+    """Redirect to a random story. Returns 404 if the DB is empty."""
+    story = StoryRepository.get_random()
+    if story is None:
+        abort(404)
+    # When a dedicated story page lands, change target to 'main.story_detail'.
+    # For now we anchor-scroll to the story card on the home feed.
+    return redirect(url_for("main.index") + f"#story-{story.id}")
 
 
 @main_bp.route("/section/<slug>")
@@ -37,6 +58,7 @@ def section(slug: str):
     return render_template(
         "index.html",
         stories=stories,
+        comment_counts=_comment_counts_for(stories),
         nav_sections=nav_sections,
         active_section=slug,
     )

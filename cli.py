@@ -25,6 +25,13 @@ Wired into the app via `register_cli(app)` in app.py. After exporting
     flask list-stories
     flask delete-story <id>
 
+    # Comments
+    flask add-comment <story_id> --body "текст"          # inline body
+    flask add-comment <story_id> --body-file body.txt    # from a file (UTF-8)
+    flask add-comment <story_id> --body "..." --author "anon"
+    flask list-comments <story_id>
+    flask delete-comment <comment_id>
+
     # Bulk import from prefab folders (story_prefabs/, images_prefabs/)
     flask import-prefabs           # idempotent
     flask import-prefabs --force   # replace existing rows that match
@@ -40,6 +47,7 @@ from flask import Flask
 from flask.cli import with_appcontext
 
 from models.database import db
+from repositories.comment_repository import CommentRepository
 from repositories.image_repository import ImageRepository
 from repositories.story_repository import StoryRepository
 from services.seeder import seed_database
@@ -182,7 +190,7 @@ def list_stories_cmd():
 @click.argument("story_id", type=int)
 @with_appcontext
 def delete_story_cmd(story_id):
-    """Delete a story by id. Cascades to its images."""
+    """Delete a story by id. Cascades to its images and comments."""
     if StoryRepository.delete(story_id):
         click.echo(f"Deleted story {story_id}")
     else:
@@ -212,6 +220,90 @@ def import_prefabs_cmd(force: bool, quiet: bool):
 
 
 # =====================================================================
+# Comments - one-off commands
+# =====================================================================
+
+@click.command("add-comment")
+@click.argument("story_id", type=int)
+@click.option(
+    "--body",
+    default=None,
+    help="Comment body (use --body-file for long text or non-Latin scripts).",
+)
+@click.option(
+    "--body-file",
+    type=click.Path(exists=True, dir_okay=False, readable=True),
+    default=None,
+    help="Path to a UTF-8 .txt file containing the comment body.",
+)
+@click.option(
+    "--author",
+    default=None,
+    help='Author display name (default: anon).',
+)
+@with_appcontext
+def add_comment_cmd(story_id, body, body_file, author):
+    """Add a comment to a story.
+
+    One of --body / --body-file is required. Use --body-file for any
+    multi-line / multi-paragraph content - shells often mangle quoted
+    Cyrillic on Windows, while reading from a UTF-8 file is reliable.
+    """
+    if body is None and body_file is None:
+        click.echo("Either --body or --body-file is required.", err=True)
+        raise click.exceptions.Exit(code=2)
+    if body is not None and body_file is not None:
+        click.echo("Pass only one of --body / --body-file.", err=True)
+        raise click.exceptions.Exit(code=2)
+
+    if body_file is not None:
+        body = Path(body_file).read_text(encoding="utf-8")
+
+    comment = CommentRepository.create(
+        story_id=story_id, body=body, author=author,
+    )
+    if comment is None:
+        click.echo(
+            f"Failed to add comment to story {story_id} "
+            f"(empty body, too long, or story does not exist).",
+            err=True,
+        )
+        raise click.exceptions.Exit(code=1)
+
+    click.echo(
+        f"Created comment id={comment.id} on story {story_id} "
+        f"by {comment.author or 'anon'}"
+    )
+
+
+@click.command("list-comments")
+@click.argument("story_id", type=int)
+@with_appcontext
+def list_comments_cmd(story_id):
+    """Show every comment on a story, oldest-first."""
+    comments = CommentRepository.list_for_story(story_id)
+    if not comments:
+        click.echo(f"No comments for story {story_id}.")
+        return
+    for c in comments:
+        stamp = c.created_at.strftime("%Y-%m-%d %H:%M")
+        author = c.author or "anon"
+        click.echo(f"  {c.id:>4}  {stamp}  {author!r:<20}  {c.body!r}")
+
+
+@click.command("delete-comment")
+@click.argument("comment_id", type=int)
+@with_appcontext
+def delete_comment_cmd(comment_id):
+    """Delete a comment by id."""
+    if CommentRepository.delete(comment_id):
+        click.echo(f"Deleted comment {comment_id}")
+    else:
+        click.echo(f"Comment {comment_id} not found", err=True)
+        raise click.exceptions.Exit(code=1)
+
+
+# =====================================================================
 # Wiring
 # =====================================================================
 
@@ -226,5 +318,9 @@ def register_cli(app: Flask) -> None:
         list_stories_cmd,
         delete_story_cmd,
         import_prefabs_cmd,
+        # Comments
+        add_comment_cmd,
+        list_comments_cmd,
+        delete_comment_cmd,
     ):
         app.cli.add_command(cmd)

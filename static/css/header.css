@@ -125,3 +125,21 @@
   border-color: var(--color-accent-dim);
   background: rgba(179, 0, 0, 0.08);
 }
+
+/* ---- Random-pasta button: accent border to make it stand out. ---- */
+.site-header__nav-link--random {
+  border-color: var(--color-accent-dim);
+  color: var(--color-accent-bright);
+  opacity: 0.75;
+  transition:
+    opacity     var(--dur-fast) var(--ease-out),
+    border      var(--dur-fast) var(--ease-out),
+    background  var(--dur-fast) var(--ease-out);
+}
+
+.site-header__nav-link--random:hover,
+.site-header__nav-link--random:focus-visible {
+  opacity: 1;
+  background: rgba(179, 0, 0, 0.12);
+  border-color: var(--color-accent-bright);
+}

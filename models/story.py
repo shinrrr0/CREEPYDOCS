@@ -20,6 +20,7 @@ from models.database import db
 if TYPE_CHECKING:
     # Imported only for type hints to avoid circular imports at runtime.
     from models.image import Image
+    from models.comment import Comment
 
 
 class Story(db.Model):
@@ -54,6 +55,15 @@ class Story(db.Model):
         foreign_keys="Image.story_id",
     )
 
+    # Comments attached to this story. Same cascade pattern as images so
+    # deleting a story removes its thread via either ORM or SQL.
+    comments: Mapped[List["Comment"]] = relationship(
+        back_populates="story",
+        cascade="all, delete-orphan",
+        order_by="Comment.created_at",
+        foreign_keys="Comment.story_id",
+    )
+
     # ---- Convenience accessors used by templates ----
     @property
     def cover_image(self) -> Optional["Image"]:
@@ -75,7 +85,7 @@ class Story(db.Model):
     #   view_count:    cached counter
     #   updated_at:    last edit time
     # FUTURE relationships:
-    #   comments, tags - add when those features are scheduled.
+    #   tags - add when that feature is scheduled.
 
     def __repr__(self) -> str:
         return f"<Story id={self.id} title={self.title!r}>"

@@ -12,7 +12,7 @@
      story  - object with .title, .body, optionally .author, .created_at,
               and .cover_image / .gallery_images (DB-driven).
    ==================================================================== #}
-<article class="content-block" data-expanded="false">
+<article class="content-block" id="story-{{ story.id }}" data-expanded="false">
 
   {# Title - typewriter font, bold, separated from body by a rule. #}
   <header class="content-block__header">
@@ -88,7 +88,15 @@
     </div>
   {% endif %}
 
-  {# FUTURE: comments section, reactions, share button, tags row.
+
+  {# Comments API is mounted at /api/stories/<id>/comments. The feed shows
+     the precomputed count here; a richer thread UI can fetch that endpoint. #}
+  <footer class="content-block__comments-summary">
+    <span aria-hidden="true">💬</span>
+    <span>{{ (comment_counts or {}).get(story.id, 0) }} комментариев</span>
+  </footer>
+
+  {# FUTURE: reactions, share button, tags row, full comment thread UI.
      Add new sub-components below this line - the card grows down. #}
 
 </article>

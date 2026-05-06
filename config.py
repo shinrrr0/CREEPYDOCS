@@ -57,6 +57,18 @@ class Config:
     # a random number between 1 and MAX_BLOGS.
     MAX_BLOGS = 100
 
+    # ------------------------------------------------------------------
+    # Comments configuration
+    # ------------------------------------------------------------------
+    # Application-level cap on a comment body length. The schema column
+    # itself is TEXT (unlimited) - this cap is enforced in
+    # CommentRepository.create and the JSON route.
+    COMMENT_MAX_LENGTH = 4000
+
+    # Cap on the optional author display name. Over-long names are trimmed
+    # by the repository so the field degrades gracefully.
+    COMMENT_AUTHOR_MAX_LENGTH = 80
+
     @classmethod
     def valid_section_slugs(cls) -> set[str]:
         """Helper for repository write-side validation."""

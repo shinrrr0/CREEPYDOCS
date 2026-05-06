@@ -20,6 +20,7 @@ from routes.main import main_bp
 from routes.gallery import gallery_bp
 from routes.blog import blog_bp
 from routes.images import images_bp
+from routes.comments import comments_bp
 from cli import register_cli
 
 
@@ -35,6 +36,11 @@ def create_app(config_class: type = Config) -> Flask:
     # exists before SQLAlchemy tries to open the file.
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
+    # JSON: emit non-ASCII characters literally instead of \uXXXX escapes.
+    # This keeps Cyrillic comments readable in DevTools / curl while still
+    # producing valid JSON for browsers and clients.
+    app.json.ensure_ascii = False
+
     # Database - bind to the active app config.
     db.init_app(app)
 
@@ -46,7 +52,8 @@ def create_app(config_class: type = Config) -> Flask:
         db.create_all()
 
     # CLI: init-db, seed-db, reset-db, add-story, add-gallery-image,
-    # list-stories, delete-story, import-prefabs.
+    # list-stories, delete-story, import-prefabs, add-comment,
+    # list-comments, delete-comment.
     register_cli(app)
 
     # Blueprints. Add new ones here as the site grows
@@ -55,6 +62,7 @@ def create_app(config_class: type = Config) -> Flask:
     app.register_blueprint(gallery_bp)   # /gallery
     app.register_blueprint(blog_bp)      # /blog/* + /api/blog/*
     app.register_blueprint(images_bp)    # /image/<id>
+    app.register_blueprint(comments_bp)  # /api/stories/<id>/comments
 
     return app
 

@@ -200,3 +200,16 @@
 .content-block__gallery-item:hover img {
   transform: scale(1.06);
 }
+
+
+/* ---- Comments summary ---- */
+.content-block__comments-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

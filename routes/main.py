@@ -8,10 +8,20 @@ services/ if it grows.
 
 from flask import Blueprint, current_app, render_template, abort
 
+from repositories.comment_repository import CommentRepository
 from repositories.story_repository import StoryRepository
 
 
 main_bp = Blueprint("main", __name__)
+
+
+def _comment_counts_for(stories) -> dict:
+    """Pre-compute story_id -> comment count for a feed of stories.
+
+    Centralised here because both index() and section() need it. One
+    grouped query instead of N per-story queries.
+    """
+    return CommentRepository.counts_for_stories([s.id for s in stories])
 
 
 @main_bp.route("/")
@@ -21,6 +31,7 @@ def index():
     return render_template(
         "index.html",
         stories=stories,
+        comment_counts=_comment_counts_for(stories),
         nav_sections=current_app.config["NAV_SECTIONS"],
         active_section=None,
     )
@@ -37,6 +48,7 @@ def section(slug: str):
     return render_template(
         "index.html",
         stories=stories,
+        comment_counts=_comment_counts_for(stories),
         nav_sections=nav_sections,
         active_section=slug,
     )

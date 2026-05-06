@@ -1,12 +1,21 @@
 """
 Application configuration.
 
-NAV_SECTIONS is the single source of truth for the site's sections.
-The header and the sidebar both read it, so the navigation panel scales
-automatically with whatever you put here.
+NAV_SECTIONS is the single source of truth for the site's nav. Header
+and sidebar both read it, so the navigation panel scales automatically
+with whatever you put here.
+
+MAX_BLOGS is the upper bound for blog IDs. Users can access any blog
+from 1 to MAX_BLOGS. Blogs are created lazily: empty blogs don't exist
+in the DB until the first post is created.
 """
 
 import os
+from pathlib import Path
+
+# Project root - used to locate the SQLite file in instance/.
+_PROJECT_DIR = Path(__file__).resolve().parent
+_INSTANCE_DIR = _PROJECT_DIR / "instance"
 
 
 class Config:
@@ -14,20 +23,55 @@ class Config:
 
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
-    # FUTURE: SQLAlchemy DB URI lives here once we wire it up.
-    # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///creepydocs.db")
-    # SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # ------------------------------------------------------------------
+    # Database.
+    # Default: SQLite file at instance/creepydocs.db (Flask creates the
+    # instance/ folder for us). Override with the DATABASE_URL env var
+    # for Postgres / MySQL / etc.
+    # ------------------------------------------------------------------
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DATABASE_URL",
+        f"sqlite:///{_INSTANCE_DIR / 'creepydocs.db'}",
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Echoes SQL to stdout when True - useful in dev, noisy in prod.
+    SQLALCHEMY_ECHO = bool(int(os.environ.get("SQLALCHEMY_ECHO", "0")))
 
     # ------------------------------------------------------------------
     # Site sections - drives both header nav and sidebar nav.
-    # Add/remove items freely; the UI scales to match.
-    # `slug` is used in URLs; `label` is displayed.
+    # `slug` is used in URLs; `label` is displayed; `href` overrides the
+    # default /section/<slug> URL when present.
     # ------------------------------------------------------------------
     NAV_SECTIONS = [
-        {"slug": "stories",   "label": "STORIES"},
-        {"slug": "archive",   "label": "ARCHIVE"},
-        {"slug": "rituals",   "label": "RITUALS"},
-        {"slug": "lost",      "label": "LOST FILES"},
-        {"slug": "submit",    "label": "SUBMIT"},
-        {"slug": "about",     "label": "ABOUT"},
+        {"slug": "stories",   "label": "ИСТОРИИ"},
+        {"slug": "gallery",   "label": "ГАЛЕРЕЯ", "href": "/gallery"},
+        {"slug": "blog",      "label": "БЛОГ",    "href": "/blog/random"},
     ]
+
+    # ------------------------------------------------------------------
+    # Blog configuration
+    # ------------------------------------------------------------------
+    # Maximum number of blogs. Each blog is identified by a number from
+    # 1 to MAX_BLOGS. Blogs are created lazily - they don't need to
+    # exist in DB until the first post. The "random blog" button picks
+    # a random number between 1 and MAX_BLOGS.
+    MAX_BLOGS = 100
+
+    # ------------------------------------------------------------------
+    # Comments configuration
+    # ------------------------------------------------------------------
+    # Application-level cap on a comment body length. The schema column
+    # itself is TEXT (unlimited) - this cap is enforced in
+    # CommentRepository.create and the JSON route, and surfaced to the
+    # client via the textarea's `maxlength` attribute (mirror this
+    # value if you change it).
+    COMMENT_MAX_LENGTH = 4000
+
+    # Cap on the optional author display name. Trimmed (not rejected)
+    # by the repository so over-long names degrade gracefully.
+    COMMENT_AUTHOR_MAX_LENGTH = 80
+
+    @classmethod
+    def valid_section_slugs(cls) -> set[str]:
+        """Helper for repository write-side validation."""
+        return {s["slug"] for s in cls.NAV_SECTIONS}

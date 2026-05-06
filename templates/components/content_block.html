@@ -12,7 +12,7 @@
      story  - object with .title, .body, optionally .author, .created_at,
               and .cover_image / .gallery_images (DB-driven).
    ==================================================================== #}
-<article class="content-block" data-expanded="false">
+<article class="content-block" id="story-{{ story.id }}" data-expanded="false">
 
   {# Title - typewriter font, bold, separated from body by a rule. #}
   <header class="content-block__header">

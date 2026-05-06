@@ -21,6 +21,13 @@
         href="{{ section.get('href') or url_for('main.section', slug=section.slug) }}"
       >{{ section.label }}</a>
     {% endfor %}
+
+    {# ---- Random story button - standalone so it doesn't pollute NAV_SECTIONS. ---- #}
+    <a
+      class="site-header__nav-link site-header__nav-link--random"
+      href="{{ url_for('main.random_story') }}"
+      title="Открыть случайную пасту"
+    >🎲 СЛУЧАЙНАЯ ПАСТА</a>
   </nav>
 
 </header>

@@ -1,0 +1,119 @@
+{# ====================================================================
+   submit.html - user pasta submission page.
+   Form only. After publishing the story surfaces at the top of the
+   main feed (/) — no embedded duplicate list here.
+   ==================================================================== #}
+{% extends 'base.html' %}
+
+{% block title %}CreepyDocs — Написать пасту{% endblock %}
+
+{% block content %}
+<div class="submit-wrapper">
+
+  {# ---- Page header ---- #}
+  <div class="submit-header">
+    <h2 class="submit-header__title">НАПИСАТЬ ПАСТУ</h2>
+    <p class="submit-header__sub">
+      Опубликуй свою историю — она появится в общем архиве.
+    </p>
+  </div>
+
+  {# ---- Submission form ---- #}
+  <form
+    class="submit-form"
+    id="submit-form"
+    enctype="multipart/form-data"
+    novalidate
+  >
+
+    {# Title #}
+    <div class="submit-form__group">
+      <label class="submit-form__label" for="submit-title">Заголовок *</label>
+      <input
+        type="text"
+        id="submit-title"
+        name="title"
+        class="submit-form__input"
+        placeholder="Название истории"
+        maxlength="200"
+        required
+        autocomplete="off"
+      />
+    </div>
+
+    {# Author #}
+    <div class="submit-form__group">
+      <label class="submit-form__label" for="submit-author">
+        Автор <span class="submit-form__optional">(необязательно)</span>
+      </label>
+      <input
+        type="text"
+        id="submit-author"
+        name="author"
+        class="submit-form__input"
+        placeholder="Имя или псевдоним"
+        maxlength="120"
+        autocomplete="nickname"
+      />
+    </div>
+
+    {# Body #}
+    <div class="submit-form__group">
+      <label class="submit-form__label" for="submit-body">Текст *</label>
+      <textarea
+        id="submit-body"
+        name="body"
+        class="submit-form__input submit-form__textarea"
+        placeholder="Твоя история... Пустые строки разделяют абзацы."
+        rows="14"
+        required
+      ></textarea>
+      <span class="submit-form__char-count" id="submit-char-count">0 символов</span>
+    </div>
+
+    {# Cover image #}
+    <div class="submit-form__group submit-form__file-group">
+      <label class="submit-form__label">
+        Обложка <span class="submit-form__optional">(необязательно)</span>
+      </label>
+      <label class="submit-form__file-label" for="submit-image">
+        <svg class="submit-form__file-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+        </svg>
+        <span class="submit-form__file-text" id="submit-file-text">Выбрать изображение</span>
+      </label>
+      <input
+        type="file"
+        id="submit-image"
+        name="image"
+        class="submit-form__file-input"
+        accept="image/*"
+      />
+    </div>
+
+    {# Error banner #}
+    <div class="submit-form__error" id="submit-error" hidden></div>
+
+    {# Submit #}
+    <button type="submit" class="submit-form__submit" id="submit-btn">
+      Опубликовать
+    </button>
+
+  </form>
+
+  {# ---- Success banner (shown by JS after publish) ---- #}
+  <div class="submit-success" id="submit-success" hidden>
+    <span class="submit-success__icon" aria-hidden="true">✓</span>
+    <div class="submit-success__text">
+      <strong>Опубликовано!</strong>
+      Твоя история уже в архиве.
+    </div>
+    <a href="/" class="submit-success__link">Перейти в архив →</a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script defer src="{{ url_for('static', filename='js/submit.js') }}"></script>
+{% endblock %}

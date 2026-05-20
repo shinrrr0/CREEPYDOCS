@@ -7,17 +7,19 @@
        button appears.
      - Clicking expand removes the clamp; the block grows to fit.
      - JS auto-detects overflow and only shows the button when needed.
+     - Comment section: toggle button reveals the thread + form.
+       Comments are loaded lazily via GET /api/stories/<id>/comments.
 
    Required context:
-     story  - object with .title, .body, optionally .author, .created_at,
-              and .cover_image / .gallery_images (DB-driven).
+     story          - object with .title, .body, optionally .author,
+                      .created_at, .cover_image / .gallery_images.
+     comment_counts - dict mapping story.id -> int (pre-fetched).
    ==================================================================== #}
 <article class="content-block" id="story-{{ story.id }}" data-expanded="false">
 
   {# Title - typewriter font, bold, separated from body by a rule. #}
   <header class="content-block__header">
     <h2 class="content-block__title">{{ story.title }}</h2>
-    {# Optional metadata row. Hide gracefully if attrs are missing. #}
     {% if story.author or story.created_at %}
       <div class="content-block__meta">
         {% if story.author %}
@@ -32,10 +34,7 @@
     {% endif %}
   </header>
 
-  {# Cover image - rendered above the body when the story has one.
-     Uses image.url (model property) so the URL scheme is owned by the
-     model, not the template. `loading="lazy"` keeps below-the-fold
-     covers from blocking initial paint. #}
+  {# Cover image #}
   {% if story.cover_image is defined and story.cover_image %}
     <figure class="content-block__cover">
       <img
@@ -48,19 +47,17 @@
     </figure>
   {% endif %}
 
-  {# Body wrapper: JS reads data-collapsed-height to clamp height. #}
+  {# Body wrapper #}
   <div class="content-block__body" data-role="body">
     <div class="content-block__text" data-role="text">
-      {# Render paragraphs from \n\n splits without breaking on missing input. #}
       {% for paragraph in (story.body or '').split('\n\n') %}
         <p>{{ paragraph }}</p>
       {% endfor %}
     </div>
-    {# Fade overlay sits on top of the clipped text. CSS owns the gradient. #}
     <div class="content-block__fade" data-role="fade" aria-hidden="true"></div>
   </div>
 
-  {# Expand toggle. Hidden until JS confirms there is overflow. #}
+  {# Expand toggle #}
   <button
     class="content-block__toggle"
     type="button"
@@ -71,9 +68,7 @@
     <span class="content-block__toggle-label" data-label-expanded>COLLAPSE</span>
   </button>
 
-  {# Optional gallery - non-cover images attached to the story. Renders
-     below the toggle so it appears once the body has been expanded
-     in long-form. #}
+  {# Gallery images #}
   {% if story.gallery_images is defined and story.gallery_images %}
     <div class="content-block__gallery">
       {% for image in story.gallery_images %}
@@ -88,15 +83,62 @@
     </div>
   {% endif %}
 
+  {# ================================================================
+     COMMENT SECTION
+     data-story-id is read by comments.js to know which API endpoint
+     to call. The panel starts hidden; the toggle button opens it.
+     ================================================================ #}
+  <section
+    class="content-block__comments"
+    data-story-id="{{ story.id }}"
+    aria-label="Комментарии к истории «{{ story.title }}»"
+  >
+    {# ---- Toggle button ---- #}
+    <button
+      class="comments__toggle"
+      type="button"
+      data-role="comments-toggle"
+      data-open="false"
+      aria-expanded="false"
+    >
+      <span class="comments__toggle-icon" aria-hidden="true">💬</span>
+      <span data-role="comments-count">{{ (comment_counts or {}).get(story.id, 0) }}</span>
+      <span class="comments__toggle-label">комментариев</span>
+      <span class="comments__toggle-arrow" aria-hidden="true">▾</span>
+    </button>
 
-  {# Comments API is mounted at /api/stories/<id>/comments. The feed shows
-     the precomputed count here; a richer thread UI can fetch that endpoint. #}
-  <footer class="content-block__comments-summary">
-    <span aria-hidden="true">💬</span>
-    <span>{{ (comment_counts or {}).get(story.id, 0) }} комментариев</span>
-  </footer>
+    {# ---- Collapsible panel ---- #}
+    <div class="comments__panel" data-role="comments-panel" hidden>
 
-  {# FUTURE: reactions, share button, tags row, full comment thread UI.
-     Add new sub-components below this line - the card grows down. #}
+      {# Loaded comment list (JS populates this) #}
+      <div class="comments__list" data-role="comments-list"></div>
+
+      {# Add-comment form #}
+      <form class="comments__form" data-role="comments-form" novalidate>
+        <div class="comments__form-row">
+          <input
+            type="text"
+            name="author"
+            class="comments__input comments__input--author"
+            placeholder="Имя (необязательно)"
+            maxlength="80"
+            autocomplete="nickname"
+          />
+        </div>
+        <div class="comments__form-row">
+          <textarea
+            name="body"
+            class="comments__input comments__textarea"
+            placeholder="Напишите комментарий..."
+            rows="3"
+            required
+          ></textarea>
+        </div>
+        <div class="comments__error" data-role="comments-error" hidden></div>
+        <button type="submit" class="comments__submit">Отправить</button>
+      </form>
+
+    </div>{# /comments__panel #}
+  </section>
 
 </article>

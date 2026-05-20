@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/blog.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/submit.css') }}" />
   {# Per-page extra styles – child templates override this block. #}
   {% block extra_css %}{% endblock %}
 </head>
@@ -51,6 +52,7 @@
   <script defer src="{{ url_for('static', filename='js/content_expand.js') }}"></script>
   <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script defer src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/comments.js') }}"></script>
   {# Per-page extra scripts – child templates override this block. #}
   {% block extra_js %}{% endblock %}
 </body>

@@ -1,5 +1,6 @@
 /* ====================================================================
-   blog.js - blog post creation, file upload, AJAX submission.
+   blog.js - blog post creation, file upload, AJAX submission,
+             and blog-number navigation.
    Each blog has its own form with blog_id in data attribute.
    ==================================================================== */
 
@@ -7,21 +8,55 @@
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('post-form');
+
+    /* ----------------------------------------------------------------
+       Blog number navigation
+       ---------------------------------------------------------------- */
+    var goInput = document.getElementById('blog-go-input');
+    var goBtn   = document.getElementById('blog-go-btn');
+
+    function navigateToBlog() {
+      var val = parseInt(goInput.value, 10);
+      var min = parseInt(goInput.min, 10) || 1;
+      var max = parseInt(goInput.max, 10) || 100;
+      if (!val || val < min || val > max) {
+        goInput.classList.add('blog-header__go-input--invalid');
+        setTimeout(function () {
+          goInput.classList.remove('blog-header__go-input--invalid');
+        }, 600);
+        return;
+      }
+      window.location.href = '/blog/' + val;
+    }
+
+    if (goBtn) {
+      goBtn.addEventListener('click', navigateToBlog);
+    }
+
+    if (goInput) {
+      goInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') navigateToBlog();
+      });
+    }
+
+    /* ----------------------------------------------------------------
+       Post creation form
+       ---------------------------------------------------------------- */
+    var form = document.getElementById('post-form');
     if (!form) return;
 
-    const blogId = form.dataset.blogId;
+    var blogId = form.dataset.blogId;
     if (!blogId) {
       console.error('Blog ID not found in form data');
       return;
     }
 
-    const textarea = form.querySelector('textarea[name="text"]');
-    const fileInput = form.querySelector('input[name="image"]');
-    const fileLabel = form.querySelector('.post-form__file-label');
-    const fileName = document.getElementById('file-name');
-    const errorDiv = document.getElementById('post-error');
-    const submitBtn = form.querySelector('.post-form__submit');
+    var textarea  = form.querySelector('textarea[name="text"]');
+    var fileInput = form.querySelector('input[name="image"]');
+    var fileLabel = form.querySelector('.post-form__file-label');
+    var fileName  = document.getElementById('file-name');
+    var errorDiv  = document.getElementById('post-error');
+    var submitBtn = form.querySelector('.post-form__submit');
 
     // ---- File selection display ----
     fileInput.addEventListener('change', function () {
@@ -61,8 +96,8 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
-      const text = textarea.value.trim();
-      const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
+      var text = textarea.value.trim();
+      var file = fileInput.files.length > 0 ? fileInput.files[0] : null;
 
       // Client-side validation
       if (!text && !file) {
@@ -71,7 +106,7 @@
       }
 
       // Build FormData
-      const formData = new FormData();
+      var formData = new FormData();
       if (text) formData.append('text', text);
       if (file) formData.append('image', file);
 
@@ -79,14 +114,14 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Отправляю...';
 
-      // POST to API - use blog_id in URL
-      const apiUrl = `/api/blog/${blogId}/post`;
+      // POST to API
+      var apiUrl = '/api/blog/' + blogId + '/post';
       fetch(apiUrl, {
         method: 'POST',
         body: formData,
       })
-        .then(response => response.json())
-        .then(data => {
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
           if (data.success) {
             // Clear form
             textarea.value = '';
@@ -94,18 +129,16 @@
             fileName.textContent = '';
             errorDiv.style.display = 'none';
 
-            // Reload posts (simple: reload page)
-            // TODO: add AJAX reload of posts instead of full page reload
             location.reload();
           } else {
             showError(data.error || 'Ошибка при создании поста');
           }
         })
-        .catch(err => {
+        .catch(function (err) {
           showError('Сетевая ошибка: ' + err.message);
           console.error(err);
         })
-        .finally(() => {
+        .finally(function () {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Отправить';
         });
@@ -114,7 +147,7 @@
     function showError(message) {
       errorDiv.textContent = message;
       errorDiv.style.display = 'block';
-      setTimeout(() => {
+      setTimeout(function () {
         errorDiv.style.display = 'none';
       }, 5000);
     }

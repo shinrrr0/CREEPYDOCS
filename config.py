@@ -66,6 +66,7 @@ class Config:
         {"slug": "stories",   "label": "ИСТОРИИ"},
         {"slug": "gallery",   "label": "ГАЛЕРЕЯ", "href": "/gallery"},
         {"slug": "blog",      "label": "БЛОГ",    "href": "/blog/random"},
+        {"slug": "submit",    "label": "НАПИСАТЬ", "href": "/submit"},
     ]
 
     # ------------------------------------------------------------------

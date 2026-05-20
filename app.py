@@ -23,6 +23,7 @@ from routes.gallery import gallery_bp
 from routes.blog import blog_bp
 from routes.images import images_bp
 from routes.comments import comments_bp
+from routes.submit import submit_bp
 from cli import register_cli
 
 
@@ -102,6 +103,7 @@ def create_app(config_class: type = Config) -> Flask:
     app.register_blueprint(blog_bp)      # /blog/* + /api/blog/*
     app.register_blueprint(images_bp)    # /image/<id>
     app.register_blueprint(comments_bp)  # /api/stories/<id>/comments
+    app.register_blueprint(submit_bp)    # /submit + /api/submit
 
     return app
 

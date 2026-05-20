@@ -1,7 +1,6 @@
 /* ====================================================================
-   header.css - top title bar + nav row.
-   Hides on scroll-down (JS sets data-state="hidden").
-   The nav uses flex-wrap so it scales to any number of items.
+   header.css - single-row compact header.
+   Title on the left, nav on the right, no wrapping.
    ==================================================================== */
 
 .site-header {
@@ -9,86 +8,74 @@
   top: 0; left: 0; right: 0;
   z-index: var(--z-header);
 
-  background: linear-gradient(
-    to bottom,
-    rgba(10, 10, 10, 0.96) 0%,
-    rgba(10, 10, 10, 0.92) 70%,
-    rgba(10, 10, 10, 0.0) 100%
-  );
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  /* left offset clears the hamburger trigger (54px wide + 16px margin) */
+  padding: 0 1.5rem 0 80px;
+  height: 60px;              /* fixed single-row height */
+
+  background: rgba(10, 10, 10, 0.96);
+  border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 
-  padding: var(--header-pad-block) 1rem 2rem;
-  /* Space on the left so the title doesn't sit under the hamburger. */
-  padding-left: 80px;
-
-  transition:
-    padding var(--dur-base) var(--ease-out);
-  will-change: transform;
+  transition: height var(--dur-base) var(--ease-out),
+              opacity var(--dur-base) var(--ease-out);
+  will-change: height;
 }
 
-/* Compact state on scroll-down: title hides, nav stays visible */
+/* Compact state on scroll-down — slightly thinner */
 .site-header[data-state="compact"] {
-  padding: 0.75rem 1rem 1rem;
-  background: linear-gradient(
-    to bottom,
-    rgba(10, 10, 10, 0.98) 0%,
-    rgba(10, 10, 10, 0.94) 100%
-  );
+  height: 52px;
 }
 
-.site-header[data-state="compact"] .site-header__title-row {
-  display: none;
-}
-
-/* Hidden state (legacy support - hides everything) */
+/* Hidden state */
 .site-header[data-state="hidden"] {
   transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
 }
 
-/* ---- Title ---- */
+/* ---- Title (left side) ---- */
 .site-header__title-row {
-  text-align: center;
-  margin-bottom: 1rem;
+  flex-shrink: 0;            /* don't let the title compress */
 }
 
 .site-header__title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(2.75rem, 8vw, 5.5rem);
-  letter-spacing: 0.04em;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);  /* much smaller than before */
+  letter-spacing: 0.06em;
   line-height: 1;
   color: var(--color-accent-bright);
-  /* Layered text-shadow for a subtle bleed/glow. */
   text-shadow:
-    0 0 12px rgba(230, 0, 0, 0.55),
-    0 0 32px rgba(179, 0, 0, 0.35),
-    2px 2px 0 #000;
-  /* Faint ghosting effect using transform. */
-  transform: translateZ(0);
+    0 0 8px rgba(230, 0, 0, 0.5),
+    0 0 22px rgba(179, 0, 0, 0.28);
   user-select: none;
+  white-space: nowrap;
 }
 
-/* ---- Nav row ---- */
+/* ---- Nav (right side) ---- */
 .site-header__nav {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem 1.25rem;
-  max-width: 1100px;
-  margin: 0 auto;
+  flex-wrap: nowrap;         /* single row, no wrapping */
+  align-items: center;
+  gap: 0.1rem;
+  overflow: hidden;          /* clip if viewport is tiny */
 }
 
 .site-header__nav-link {
   font-family: var(--font-typewriter);
-  font-size: 0.95rem;
-  letter-spacing: 0.18em;
+  font-size: 0.8rem;         /* compact — fits all items */
+  letter-spacing: 0.14em;
   color: var(--color-text-secondary);
-  padding: 0.5rem 0.9rem;
+  padding: 0.45rem 0.75rem;
   border: 1px solid transparent;
+  white-space: nowrap;       /* prevent individual link wrapping */
   position: relative;
   transition:
     color      var(--dur-fast) var(--ease-out),
@@ -96,28 +83,10 @@
     background var(--dur-fast) var(--ease-out);
 }
 
-.site-header__nav-link::before {
-  /* Bracket marks that fade in on hover. */
-  content: '[ ';
-  opacity: 0;
-  transition: opacity var(--dur-fast) var(--ease-out);
-}
-.site-header__nav-link::after {
-  content: ' ]';
-  opacity: 0;
-  transition: opacity var(--dur-fast) var(--ease-out);
-}
-
 .site-header__nav-link:hover,
 .site-header__nav-link:focus-visible {
   color: var(--color-accent-bright);
   outline: none;
-}
-.site-header__nav-link:hover::before,
-.site-header__nav-link:hover::after,
-.site-header__nav-link:focus-visible::before,
-.site-header__nav-link:focus-visible::after {
-  opacity: 1;
 }
 
 .site-header__nav-link.is-active {
@@ -126,11 +95,12 @@
   background: rgba(179, 0, 0, 0.08);
 }
 
-/* ---- Random-pasta button: accent border to make it stand out. ---- */
+/* ---- Random pasta button ---- */
 .site-header__nav-link--random {
   border-color: var(--color-accent-dim);
   color: var(--color-accent-bright);
-  opacity: 0.75;
+  opacity: 0.8;
+  margin-left: 0.35rem;      /* small extra gap before the accent button */
   transition:
     opacity     var(--dur-fast) var(--ease-out),
     border      var(--dur-fast) var(--ease-out),
@@ -142,4 +112,11 @@
   opacity: 1;
   background: rgba(179, 0, 0, 0.12);
   border-color: var(--color-accent-bright);
+}
+
+/* ---- Mobile: hide nav, rely on sidebar ---- */
+@media (max-width: 700px) {
+  .site-header__nav { display: none; }
+  .site-header { padding-left: 72px; }
+  .site-header__title { font-size: 1.25rem; }
 }

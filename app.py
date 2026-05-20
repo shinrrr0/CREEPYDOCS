@@ -7,11 +7,13 @@ models/.
 """
 
 import os
+import sqlite3 as _sqlite3
 import subprocess
 import sys
 from pathlib import Path
 
 from flask import Flask
+from sqlalchemy import event
 
 from config import Config
 from models.database import db
@@ -43,6 +45,43 @@ def create_app(config_class: type = Config) -> Flask:
 
     # Database - bind to the active app config.
     db.init_app(app)
+
+    # ------------------------------------------------------------------
+    # SQLite PRAGMA setup.
+    #
+    # Registered on the engine's "connect" event so every new connection
+    # (including those opened by the Flask CLI, e.g. flask import-prefabs)
+    # automatically gets these settings.
+    #
+    # WAL (Write-Ahead Log) mode:
+    #   • Readers and writers no longer block each other.
+    #   • DB Browser for SQLite can open and browse the file while the
+    #     Flask dev server is running, without seeing a locked or empty
+    #     database.
+    #   • The WAL file is automatically checkpointed (merged back into
+    #     the main .db file) when the last connection closes, so the
+    #     .db file always reflects committed data when Flask is not running.
+    #
+    # FOREIGN KEYS:
+    #   SQLite disables FK enforcement by default; enabling it makes
+    #   ON DELETE CASCADE actually work at the DB level (the ORM
+    #   cascade already handles it, but this protects against raw SQL
+    #   edits and CLI delete commands).
+    #
+    # SYNCHRONOUS = NORMAL:
+    #   Safer than OFF, faster than FULL. Fine for WAL mode because
+    #   WAL already guarantees durability on a crash.
+    # ------------------------------------------------------------------
+    with app.app_context():
+        @event.listens_for(db.engine, "connect")
+        def _set_sqlite_pragmas(dbapi_conn, _connection_record):
+            if not isinstance(dbapi_conn, _sqlite3.Connection):
+                return  # only SQLite needs these; Postgres/MySQL ignore
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.close()
 
     # Auto-create tables on first startup so `python app.py` works
     # without a separate `flask init-db` step. Idempotent: existing

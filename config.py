@@ -38,6 +38,26 @@ class Config:
     SQLALCHEMY_ECHO = bool(int(os.environ.get("SQLALCHEMY_ECHO", "0")))
 
     # ------------------------------------------------------------------
+    # SQLite connection pool & engine options.
+    #
+    # NullPool closes every connection immediately after use instead of
+    # keeping idle connections alive.  This is the recommended setting
+    # for SQLite file databases because:
+    #   • SQLite is not designed for connection pooling (it is a single
+    #     process / single writer model).
+    #   • On Windows, idle pooled connections hold a Windows file-level
+    #     lock that prevents DB Browser (and other tools) from opening
+    #     or reading the database file while Flask is running.
+    #   • Even on Linux the pooled idle connection keeps a BEGIN-level
+    #     read snapshot, so WAL-mode changes written by the CLI command
+    #     (import_prefabs.bat → flask import-prefabs) are invisible to
+    #     that connection until its transaction ends.
+    # ------------------------------------------------------------------
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "poolclass": __import__("sqlalchemy.pool", fromlist=["NullPool"]).NullPool,
+    }
+
+    # ------------------------------------------------------------------
     # Site sections - drives both header nav and sidebar nav.
     # `slug` is used in URLs; `label` is displayed; `href` overrides the
     # default /section/<slug> URL when present.
